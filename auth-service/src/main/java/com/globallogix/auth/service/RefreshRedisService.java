@@ -1,0 +1,34 @@
+package com.globallogix.auth.service;
+
+import com.globallogix.auth.entity.User;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class RefreshRedisService {
+    private final RedisTemplate<String, String> redisTemplate;
+    private static final String CACHE_KEY_PREFIX = "refresh:";
+
+    public void saveRefreshToCache(String token, String username){
+        redisTemplate.opsForValue().set(CACHE_KEY_PREFIX + username, token, Duration.ofDays(7));
+        log.info("Refresh token saved to cache successfully");
+    }
+
+    public void deleteTokenFromCache(String username){
+        redisTemplate.opsForValue().getAndDelete(CACHE_KEY_PREFIX + username);
+        log.info("Refresh token deleted from cache successfully");
+    }
+
+    public Optional<String> getRefreshTokenFromCache(String username){
+        return Optional.ofNullable(
+                redisTemplate.opsForValue().get(CACHE_KEY_PREFIX+username)
+        );
+    };
+}
