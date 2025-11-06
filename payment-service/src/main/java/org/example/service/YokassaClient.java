@@ -7,13 +7,14 @@ import org.example.dto.YooKassaPaymentResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Component
 @Slf4j
 public class YokassaClient {
     public YooKassaPaymentResponse createPayment(YooKassaPaymentRequest request) {
-        log.info("📨 [MOCK] Creating payment in YooKassa: {}", request.description());
+        log.info("Creating payment in YooKassa: {}", request.description());
 
 
 
@@ -31,4 +32,21 @@ public class YokassaClient {
                 request.metadata()
         );
     }
+
+    public void capturePayment(String paymentId, BigDecimal price) {
+        log.info("CAPTURING payment: id={}, amount={}", paymentId, price);
+    }
+
+    public void cancelPayment(String paymentId) {
+        log.info("CANCELLING payment: id={}", paymentId);
+    }
+
+    public void refundPayment(String paymentId, BigDecimal amount) {
+        log.info("REFUNDING payment: id={}, amount={}", paymentId, amount);
+    }
+
+    public void payoutToCourier(Long courierId, BigDecimal amount) {
+        log.info("PAYOUT to courier: id={}, amount={}", courierId, amount);
+    }
+
 }

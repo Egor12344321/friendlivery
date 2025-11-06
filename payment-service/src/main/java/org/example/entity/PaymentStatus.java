@@ -2,7 +2,8 @@ package org.example.entity;
 
 public enum PaymentStatus {
     PENDING,
-    SUCCEEDED,
-    CANCELED,
+    CAPTURED,
+    REFUNDED,
+    CANCELLED,
     FAILED
 }

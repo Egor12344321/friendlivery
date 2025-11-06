@@ -2,10 +2,7 @@ package com.globallogix.delivery.entity;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -16,7 +13,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Data
+@Setter
+@Getter
 public class Delivery {
 
     @Id
@@ -42,7 +40,8 @@ public class Delivery {
 
     private String description;
     private Double weight;
-
+    private LocalDateTime courierAcceptedAt;
+    private LocalDateTime senderAcceptedAt;
     private DeliveryStatus status = DeliveryStatus.CREATED;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

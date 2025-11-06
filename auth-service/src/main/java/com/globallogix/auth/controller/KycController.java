@@ -47,5 +47,4 @@ public class KycController {
         userService.becomeSender(username);
         return ResponseEntity.ok("You become sender");
     }
-
 }

@@ -3,7 +3,6 @@ package org.example.kafka;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.example.kafka.events.DeliveryCreatedEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -20,31 +19,22 @@ import java.util.Map;
 public class KafkaConsumerConfig {
 
     @Bean
-    public ConsumerFactory<String, DeliveryCreatedEvent> consumerFactory(
-            ObjectMapper objectMapper
-    ) {
+    public ConsumerFactory<String, Object> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "warehouse-group");
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "payment-service");
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
 
-        JsonDeserializer<DeliveryCreatedEvent> jsonDeserializer =
-                new JsonDeserializer<>(DeliveryCreatedEvent.class, objectMapper);
+        return new DefaultKafkaConsumerFactory<>(props);
 
-        return new DefaultKafkaConsumerFactory<>(
-                props,
-                new StringDeserializer(),
-                jsonDeserializer
-        );
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, DeliveryCreatedEvent> kafkaListenerContainerFactory(
-            ConsumerFactory<String, DeliveryCreatedEvent> consumerFactory
-    ) {
-        var containerFactory = new ConcurrentKafkaListenerContainerFactory<String, DeliveryCreatedEvent>();
-        containerFactory.setConcurrency(1);
-        containerFactory.setConsumerFactory(consumerFactory);
-        return containerFactory;
+    public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory() {
+        var factory = new ConcurrentKafkaListenerContainerFactory<String, Object>();
+        factory.setConsumerFactory(consumerFactory());
+        return factory;
     }
-
 }

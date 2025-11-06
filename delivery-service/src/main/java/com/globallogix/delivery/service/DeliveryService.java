@@ -6,11 +6,10 @@ import com.globallogix.delivery.entity.Delivery;
 import com.globallogix.delivery.entity.DeliveryStatus;
 import com.globallogix.delivery.exceptions.custom_exceptions.DeliveryNotAvailableException;
 import com.globallogix.delivery.exceptions.custom_exceptions.DeliveryNotFoundException;
-import com.globallogix.delivery.kafka.events.DeliveryCreatedEvent;
+import com.globallogix.delivery.kafka.DeliveryKafkaProducer;
 import com.globallogix.delivery.repository.DeliveryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -19,14 +18,14 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class DeliveryService {
     private final DeliveryRepository deliveryRepository;
-    private final KafkaTemplate<String, DeliveryCreatedEvent> kafkaTemplate;
-
+    private final DeliveryKafkaProducer deliveryKafkaProducer;
 
     public DeliveryResponse createDelivery(DeliveryRequest request, Long senderId){
         Delivery delivery = Delivery.builder()
@@ -46,8 +45,6 @@ public class DeliveryService {
         Delivery savedDelivery = deliveryRepository.save(delivery);
         log.info("Delivery saved to db successfully");
 
-        kafkaTemplate.send("delivery.created",
-               DeliveryCreatedEvent.fromEntity(delivery));
         return mapToDeliveryResponse(savedDelivery);
     }
 
@@ -87,6 +84,8 @@ public class DeliveryService {
         return mapToDeliveryResponse(delivery);
     }
 
+
+
     public List<DeliveryResponse> getUserDeliveries(Long userId){
         try {
             List<Delivery> deliveries = deliveryRepository.findBySenderId(userId);
@@ -124,7 +123,7 @@ public class DeliveryService {
         }
 
         delivery.setCourierId(courierId);
-        delivery.setStatus(DeliveryStatus.IN_PROGRESS);
+        delivery.setStatus(DeliveryStatus.COURIER_FOUND);
         delivery.setUpdatedAt(LocalDateTime.now());
 
         Delivery updatedDelivery = deliveryRepository.save(delivery);
@@ -140,6 +139,58 @@ public class DeliveryService {
 
 
     public void deleteDelivery(Long deliveryId) {
+
         deliveryRepository.deleteById(deliveryId);
+        deliveryKafkaProducer.
+    }
+
+    public Delivery confirmDeliveryBySender(Long deliveryId, Long senderId) {
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+                .orElseThrow(() -> new DeliveryNotFoundException("Delivery not found"));
+        if (!delivery.getSenderId().equals(senderId)){
+            throw new RuntimeException("Not authorized");
+        }
+        delivery.setStatus(DeliveryStatus.PICKUP_PENDING);
+        delivery.setSenderAcceptedAt(LocalDateTime.now());
+        Map<String, Object> event = Map.of(
+                "deliveryId", delivery.getId(),
+                "senderId", delivery.getSenderId(),
+                "amount", delivery.getPrice().toString(),
+                "reason", "Товар передан курьеру"
+        );
+        deliveryKafkaProducer.sendHandoverConfirmed(delivery);
+        return deliveryRepository.save(delivery);
+    }
+
+    public Delivery confirmDeliveryByCourier(Long deliveryId, Long courierId) {
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+                .orElseThrow(() -> new DeliveryNotFoundException("Delivery not found"));
+        if (!delivery.getCourierId().equals(courierId)){
+            throw new RuntimeException("Not authorized");
+        }
+        delivery.setCourierAcceptedAt(LocalDateTime.now());
+        delivery.setStatus(DeliveryStatus.IN_PROGRESS);
+        return deliveryRepository.save(delivery);
+    }
+
+    public Delivery confirmDelivery(Long deliveryId, Long courierId) {
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+                .orElseThrow(() -> new DeliveryNotFoundException("Delivery not found"));
+        if (!delivery.getCourierId().equals(courierId)){
+            throw new RuntimeException("Not authorized");
+        }
+        delivery.setStatus(DeliveryStatus.ARRIVED);
+        return deliveryRepository.save(delivery);
+    };
+
+    public Delivery confirmArriveDelivery(Long deliveryId, Long senderId) {
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+                .orElseThrow(() -> new DeliveryNotFoundException("Delivery not found"));
+        if (!delivery.getSenderId().equals(senderId)){
+            throw new RuntimeException("Not authorized");
+        }
+        delivery.setStatus(DeliveryStatus.DELIVERED);
+        deliveryKafkaProducer.sendDeliveryCompleted(delivery);
+        return deliveryRepository.save(delivery);
     }
 }
