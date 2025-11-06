@@ -1,11 +1,9 @@
 package com.globallogix.auth.security;
 
 
-import com.globallogix.auth.entity.RefreshTokenEntity;
 import com.globallogix.auth.entity.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import org.hibernate.annotations.Comment;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -45,7 +43,7 @@ public class JwtUtil {
             return Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())
                     .build()
-                    .parseClaimsJwt(token)
+                    .parseClaimsJws(token)
                     .getBody();
         } catch (ExpiredJwtException e) {
             throw new RuntimeException("Токен истек");

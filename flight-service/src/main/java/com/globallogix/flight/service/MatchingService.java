@@ -2,7 +2,7 @@ package com.globallogix.flight.service;
 
 
 import com.globallogix.flight.client.DeliveryClient;
-import com.globallogix.flight.dto.DeliveryDto;
+import com.globallogix.flight.DeliveryDto;
 import com.globallogix.flight.entity.CourierProfile;
 import com.globallogix.flight.entity.CourierRoute;
 import com.globallogix.flight.repository.CourierProfileRepository;
@@ -48,7 +48,7 @@ public class MatchingService {
                                 && route.getArrivalAirport().equals(delivery.getToAirport())
                 );
 
-        log.debug("🛣️ Маршрут {}->{}: {}",
+        log.debug("Маршрут {}->{}: {}",
                 delivery.getFromAirport(), delivery.getToAirport(),
                 matches ? "СОВПАЛ" : "НЕ СОВПАЛ");
         return matches;
@@ -57,7 +57,7 @@ public class MatchingService {
     private boolean matchesWeight(DeliveryDto delivery, CourierProfile profile) {
         boolean matches = delivery.getWeight() <= profile.getMaxWeight();
 
-        log.debug("⚖️ Вес заявки {}кг vs курьер {}кг: {}",
+        log.debug("Вес заявки {}кг vs курьер {}кг: {}",
                 delivery.getWeight(), profile.getMaxWeight(),
                 matches ? "ПОДХОДИТ" : "СЛИШКОМ ТЯЖЕЛО");
         return matches;

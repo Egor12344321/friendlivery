@@ -6,6 +6,8 @@ import com.globallogix.delivery.service.DeliveryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -46,4 +48,8 @@ public class DeliveryController {
     public DeliveryResponse assignToDelivery(@PathVariable Long id, @RequestHeader("X-User-Id") Long courierId){
         return deliveryService.assignToDelivery(courierId, id);
     }
+
+    @DeleteMapping("/delete/{deliveryId}")
+    @CacheEvict(value = "deliveries", key = "#deliveryId")
+    public void deleteDelivery(@PathVariable Long deliveryId){deliveryService.deleteDelivery(deliveryId);}
 }

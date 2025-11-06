@@ -19,11 +19,6 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String secret;
 
-    @Value("${jwt.expiration}")
-    private long expiration;
-
-    @Value("${jwt.expiration.refresh}")
-    private long refreshExpiration;
 
     private SecretKey getSigningKey(){
         return Keys.hmacShaKeyFor(secret.getBytes());
@@ -34,7 +29,7 @@ public class JwtUtil {
             return Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())
                     .build()
-                    .parseClaimsJwt(token)
+                    .parseClaimsJws(token)
                     .getBody();
         } catch (ExpiredJwtException e) {
             throw new RuntimeException("Токен истек");

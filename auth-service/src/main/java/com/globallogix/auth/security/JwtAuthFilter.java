@@ -31,7 +31,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String username;
+        final String requestPath = request.getServletPath();
+        String path = request.getServletPath();
+        String method = request.getMethod();
 
+        log.debug("Filtering request: {} {}", method, path);
+        if (requestPath.startsWith("/api/auth/") &&
+                !requestPath.equals("/api/auth/validate")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         if (authHeader == null || !authHeader.startsWith("Bearer")){
             log.info("No token");
             filterChain.doFilter(request, response);

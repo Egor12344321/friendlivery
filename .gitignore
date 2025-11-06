@@ -11,7 +11,19 @@ target/
 *.iws
 *.iml
 *.ipr
+# Конфигурационные файлы приложения 
+application.properties
+application.yml
+application.yaml
 
+# Или используя шаблон
+# application.*
+
+# Другие типичные файлы для игнорирования
+*.log
+target/
+.idea/
+*.iml
 ### Eclipse ###
 .apt_generated
 .classpath
@@ -20,6 +32,8 @@ target/
 .settings
 .springBeans
 .sts4-cache
+**/application.properties
+**/application.yml
 
 ### NetBeans ###
 /nbproject/private/
@@ -30,7 +44,7 @@ target/
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
-
+application.*
 ### VS Code ###
 .vscode/
 

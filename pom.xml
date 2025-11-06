@@ -18,11 +18,13 @@
     </parent>
 
     <modules>
-        <module>platform-core</module>
+        <module>chat-service</module>
         <module>auth-service</module>
         <module>delivery-service</module>
         <module>flight-service</module>
         <module>api-gateway</module>
+        <module>payment-service</module>
+        <module>notifications-service</module>
     </modules>
 
     <properties>

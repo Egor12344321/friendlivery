@@ -15,17 +15,15 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 @Component
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAuthenticationFilter.Config> {
 
     private final JwtUtil jwtUtil;
-    public JwtAuthenticationFilter(JwtUtil jwtUtil){
-        super(Config.class);
-        this.jwtUtil = jwtUtil;
-    }
 
     private final Set<String> publicPaths = Set.of(
             "/api/auth/login", "/api/auth/register",
-            "/api/auth/refresh", "/api/auth/validate"
+            "/api/auth/refresh", "/auth/refresh",
+            "/auth/login", "/auth/register"
     );
     @Override
     public GatewayFilter apply(Config config) {

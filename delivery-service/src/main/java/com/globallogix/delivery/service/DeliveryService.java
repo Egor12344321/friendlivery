@@ -6,9 +6,13 @@ import com.globallogix.delivery.entity.Delivery;
 import com.globallogix.delivery.entity.DeliveryStatus;
 import com.globallogix.delivery.exceptions.custom_exceptions.DeliveryNotAvailableException;
 import com.globallogix.delivery.exceptions.custom_exceptions.DeliveryNotFoundException;
+import com.globallogix.delivery.kafka.events.DeliveryCreatedEvent;
 import com.globallogix.delivery.repository.DeliveryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -21,6 +25,8 @@ import java.util.List;
 @Slf4j
 public class DeliveryService {
     private final DeliveryRepository deliveryRepository;
+    private final KafkaTemplate<String, DeliveryCreatedEvent> kafkaTemplate;
+
 
     public DeliveryResponse createDelivery(DeliveryRequest request, Long senderId){
         Delivery delivery = Delivery.builder()
@@ -29,13 +35,19 @@ public class DeliveryService {
                 .weight(request.weight())
                 .desiredDate(request.desiredDate())
                 .description(request.description())
+                .trackingNumber(generateTrackingNumber())
                 .price(calculatePrice(request.weight()))
                 .status(DeliveryStatus.SEARCHING)
                 .courierId(null)
                 .senderId(senderId)
                 .deliveryDeadline(request.deliveryDeadline())
                 .build();
+        ;
         Delivery savedDelivery = deliveryRepository.save(delivery);
+        log.info("Delivery saved to db successfully");
+
+        kafkaTemplate.send("delivery.created",
+               DeliveryCreatedEvent.fromEntity(delivery));
         return mapToDeliveryResponse(savedDelivery);
     }
 
@@ -68,9 +80,10 @@ public class DeliveryService {
                 .setScale(0, RoundingMode.UP);
     }
 
-    public DeliveryResponse getDelivery(Long id){
-        Delivery delivery = deliveryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Delivery not found"));
+    @Cacheable(value = "deliveries", key = "#deliveryId")
+    public DeliveryResponse getDelivery(Long deliveryId){
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+                .orElseThrow(() -> new DeliveryNotFoundException("Delivery not found"));
         return mapToDeliveryResponse(delivery);
     }
 
@@ -117,5 +130,16 @@ public class DeliveryService {
         Delivery updatedDelivery = deliveryRepository.save(delivery);
 
         return mapToDeliveryResponse(updatedDelivery);
+    }
+
+    private String generateTrackingNumber() {
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        String random = String.format("%04d", (int)(Math.random() * 10000));
+        return "FLV" + timestamp.substring(7) + random;
+    }
+
+
+    public void deleteDelivery(Long deliveryId) {
+        deliveryRepository.deleteById(deliveryId);
     }
 }

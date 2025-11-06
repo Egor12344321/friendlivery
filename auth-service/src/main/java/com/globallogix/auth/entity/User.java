@@ -53,13 +53,13 @@ public class User implements UserDetails {
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "role")
     @Builder.Default
-    private Set<String> roles = new HashSet<>();
+    private Set<UserRoles> roles = new HashSet<>();
 
     @Column(name = "rating")
     private Double rating = 5.0;
 
-    @Column(name = "verify")
-    private boolean isKycVerified = false;
+    @Enumerated(EnumType.STRING)
+    private VerificationStatus verificationStatus = VerificationStatus.NOT_VERIFIED;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -69,7 +69,7 @@ public class User implements UserDetails {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
         if (this.roles.isEmpty()) {
-            this.roles.add("USER");
+            this.roles.add(UserRoles.USER);
         }
     }
 

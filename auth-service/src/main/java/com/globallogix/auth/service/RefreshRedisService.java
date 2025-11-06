@@ -22,8 +22,12 @@ public class RefreshRedisService {
     }
 
     public void deleteTokenFromCache(String username){
-        redisTemplate.opsForValue().getAndDelete(CACHE_KEY_PREFIX + username);
-        log.info("Refresh token deleted from cache successfully");
+        Boolean deleted = redisTemplate.delete(CACHE_KEY_PREFIX + username);
+        if (deleted) {
+            log.info("Refresh token deleted from cache for user: {}", username);
+        } else {
+            log.warn("Refresh token not found in cache for user: {}", username);
+        }
     }
 
     public Optional<String> getRefreshTokenFromCache(String username){

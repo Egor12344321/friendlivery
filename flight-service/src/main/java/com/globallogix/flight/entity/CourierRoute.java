@@ -30,7 +30,6 @@ public class CourierRoute {
 
     @Column(nullable = false)
     private LocalDate flightDate;
-    private Integer priority = 5;
     private boolean isActive = true;
 
     private LocalDateTime createdAt;

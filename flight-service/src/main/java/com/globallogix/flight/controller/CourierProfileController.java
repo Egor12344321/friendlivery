@@ -1,7 +1,7 @@
 package com.globallogix.flight.controller;
 
 
-import com.globallogix.flight.dto.CreateCourierProfileRequest;
+import com.globallogix.flight.CreateCourierProfileRequest;
 import com.globallogix.flight.entity.CourierProfile;
 import com.globallogix.flight.service.CourierProfileService;
 import lombok.RequiredArgsConstructor;

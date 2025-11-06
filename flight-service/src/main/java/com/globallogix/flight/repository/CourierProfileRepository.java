@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CourierProfileRepository extends JpaRepository<CourierProfile, Long> {
     CourierProfile findByUserId(Long userId);
+
 }
