@@ -6,14 +6,17 @@ import com.globallogix.flight.entity.CourierProfile;
 import com.globallogix.flight.exception.custom_exceptions.ProfileNotFoundException;
 import com.globallogix.flight.repository.CourierProfileRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CourierProfileService {
     private final CourierProfileRepository courierProfileRepository;
 
     public CourierProfile createOrUpdateProfile(Long userId, CreateCourierProfileRequest request){
+        log.debug("FLIGHT-SERVICE: Creation courier profile started");
         CourierProfile profile = courierProfileRepository.findById(userId)
                 .orElse(CourierProfile.builder().userId(userId).build());
         profile.setMaxWeight(request.getMaxWeight());

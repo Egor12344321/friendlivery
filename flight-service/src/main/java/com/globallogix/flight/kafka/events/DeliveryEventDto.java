@@ -1,4 +1,4 @@
-package com.globallogix.delivery.kafka.events;
+package com.globallogix.flight.kafka.events;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,6 +18,7 @@ public class DeliveryEventDto {
     private BigDecimal price;
     private String fromAirport;
     private String toAirport;
+
 
     public DeliveryEventDto() {
         this.timestamp = LocalDateTime.now();

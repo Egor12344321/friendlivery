@@ -44,7 +44,8 @@ public class DeliveryService {
         ;
         Delivery savedDelivery = deliveryRepository.save(delivery);
         log.info("Delivery saved to db successfully");
-
+        deliveryKafkaProducer.sendDeliveryCreated(delivery);
+        log.info("Delivery creation event sent to kafka");
         return mapToDeliveryResponse(savedDelivery);
     }
 
@@ -131,6 +132,7 @@ public class DeliveryService {
         delivery.setUpdatedAt(LocalDateTime.now());
 
         Delivery updatedDelivery = deliveryRepository.save(delivery);
+        deliveryKafkaProducer.sendDeliveryAssigned(delivery);
         log.info("Delivery saved to db");
         return mapToDeliveryResponse(updatedDelivery);
     }

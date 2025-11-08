@@ -1,7 +1,7 @@
 package com.globallogix.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.globallogix.kafka.events.DeliveryCreatedEvent;
+import com.globallogix.kafka.events.DeliveryEventDto;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.context.annotation.Bean;
@@ -10,7 +10,10 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.util.backoff.FixedBackOff;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,15 +23,18 @@ import java.util.Map;
 public class KafkaConsumerConfig {
 
     @Bean
-    public ConsumerFactory<String, DeliveryCreatedEvent> consumerFactory(
+    public ConsumerFactory<String, DeliveryEventDto> consumerFactory(
             ObjectMapper objectMapper
     ) {
         Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "warehouse-group");
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "notification-group");
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
+        props.put(ConsumerConfig.RECONNECT_BACKOFF_MS_CONFIG, 1000);
+        props.put(ConsumerConfig.RECONNECT_BACKOFF_MAX_MS_CONFIG, 10000);
 
-        JsonDeserializer<DeliveryCreatedEvent> jsonDeserializer =
-                new JsonDeserializer<>(DeliveryCreatedEvent.class, objectMapper);
+        JsonDeserializer<DeliveryEventDto> jsonDeserializer =
+                new JsonDeserializer<>(DeliveryEventDto.class, objectMapper);
 
         return new DefaultKafkaConsumerFactory<>(
                 props,
@@ -38,13 +44,12 @@ public class KafkaConsumerConfig {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, DeliveryCreatedEvent> kafkaListenerContainerFactory(
-            ConsumerFactory<String, DeliveryCreatedEvent> consumerFactory
+    public ConcurrentKafkaListenerContainerFactory<String, DeliveryEventDto> kafkaListenerContainerFactory(
+            ConsumerFactory<String, DeliveryEventDto> consumerFactory
     ) {
-        var containerFactory = new ConcurrentKafkaListenerContainerFactory<String, DeliveryCreatedEvent>();
+        var containerFactory = new ConcurrentKafkaListenerContainerFactory<String, DeliveryEventDto>();
         containerFactory.setConcurrency(1);
         containerFactory.setConsumerFactory(consumerFactory);
         return containerFactory;
     }
-
 }

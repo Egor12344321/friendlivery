@@ -6,10 +6,12 @@ import com.globallogix.flight.dto.DeliveryDto;
 import com.globallogix.flight.entity.CourierProfile;
 import com.globallogix.flight.entity.CourierRoute;
 import com.globallogix.flight.exception.custom_exceptions.RoutesNotFoundException;
+import com.globallogix.flight.kafka.events.DeliveryEventDto;
 import com.globallogix.flight.repository.CourierProfileRepository;
 import com.globallogix.flight.repository.CourierRouteRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,6 +25,7 @@ public class MatchingService {
     private final DeliveryClient deliveryClient;
     private final CourierProfileRepository courierProfileRepository;
     private final CourierRouteRepository courierRouteRepository;
+    private final KafkaTemplate<String, DeliveryEventDto> kafkaTemplate;
 
     public List<DeliveryDto> findMatchingDeliveries(Long courierId){
         log.debug("MATCHING-SERVICE: Поиск подходящих заявок для курьера: {}", courierId);
@@ -36,11 +39,11 @@ public class MatchingService {
         return allDeliveries.stream()
                 .filter(delivery -> matchesRoutes(delivery, routes))
                 .filter(delivery -> matchesWeight(delivery, profile))
-                .filter(delivery -> matchesDeadline(delivery, routes))
+                .filter(delivery -> matchesAirports(delivery, routes))
                 .collect(Collectors.toList());
     }
 
-    private boolean matchesDeadline(DeliveryDto delivery, List<CourierRoute> routes) {
+    private boolean matchesAirports(DeliveryDto delivery, List<CourierRoute> routes) {
         boolean matches = routes.stream()
                 .anyMatch(route ->
                         route.getDepartureAirport().equals(delivery.getFromAirport())
@@ -69,10 +72,32 @@ public class MatchingService {
                                 || route.getFlightDate().isEqual(delivery.getDeliveryDeadline())
                 );
 
-        log.debug("📅 Дедлайн доставки {}: {}",
+        log.debug("Дедлайн доставки {}: {}",
                 delivery.getDeliveryDeadline(),
                 matches ? "УСПЕВАЕТ" : "НЕ УСПЕВАЕТ");
         return matches;
     }
 
+
+    public void findMatchingCouriers(DeliveryEventDto event) {
+        log.debug("Matching couriers started for delivery: {}", event.getDeliveryId());
+        List<CourierRoute> routes = courierRouteRepository.findAll();
+        if (routes.isEmpty()) {
+            log.info("No courier routes found");
+            return;
+        }
+
+        for (CourierRoute route : routes) {
+            if (route.getDepartureAirport().equals(event.getFromAirport()) &&
+                    route.getArrivalAirport().equals(event.getToAirport())) {
+                notifyCourier(route.getUserId(), event);
+
+            }
+        }
+    }
+
+    private void notifyCourier(Long userId, DeliveryEventDto event) {
+        log.info("Notification to matched courier creation: {}", userId);
+        kafkaTemplate.send("courier.notifications", event);
+    }
 }

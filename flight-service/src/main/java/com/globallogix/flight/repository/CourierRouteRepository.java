@@ -10,4 +10,5 @@ import java.util.Optional;
 @Repository
 public interface CourierRouteRepository extends JpaRepository<CourierRoute, Long> {
     Optional<List<CourierRoute>> findByUserId(Long userId);
+
 }

@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class DeliveryKafkaProducer {
     private final KafkaTemplate<String, DeliveryEventDto> kafkaTemplate;
-    private final ObjectMapper objectMapper;
+
 
 
     public void sendDeliveryCreated(Delivery delivery) {
@@ -35,6 +35,11 @@ public class DeliveryKafkaProducer {
     public void sendDeliveryCompleted(Delivery delivery) {
         DeliveryEventDto event = mapDeliveryToEvent(delivery, "DELIVERY_COMPLETED");
         sendEvent("delivery.completed", event);
+    }
+
+    public void sendDeliveryAssigned(Delivery delivery){
+        DeliveryEventDto event = mapDeliveryToEvent(delivery, "DELIVERY_ASSIGNED");
+        sendEvent("delivery.assigned", event);
     }
 
 
