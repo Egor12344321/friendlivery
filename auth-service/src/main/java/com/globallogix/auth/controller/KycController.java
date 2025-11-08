@@ -26,7 +26,6 @@ public class KycController {
     private final UserService userService;
 
     @PostMapping("/documents/upload")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<String> uploadPassport(
             @RequestParam("passportFront") MultipartFile passportFront,
             @RequestParam("passportBack") MultipartFile passportBack,
@@ -40,7 +39,6 @@ public class KycController {
     }
 
     @PostMapping("/apply/sender")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<String> becomeSender(){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();

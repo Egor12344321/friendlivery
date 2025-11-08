@@ -25,6 +25,7 @@ public class JwtUtil {
     }
 
     public Claims extractAllClaims(String token) {
+        log.info("JwtUtil: Получение всех claims");
         try {
             return Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())
@@ -37,7 +38,20 @@ public class JwtUtil {
             throw new RuntimeException("Невалидный токен");
         }
     }
+    public String extractUsername(String token) {
+        return extractAllClaims(token).getSubject();
+    }
 
+    public Object extractUserId(String token) {
+
+        Claims claims = extractAllClaims(token);
+        Object userIdObj = claims.get("userId");
+        log.info("UserId from token - type: {}, value: {}",
+                userIdObj != null ? userIdObj.getClass().getSimpleName() : "null",
+                userIdObj);
+
+        return userIdObj;
+    }
     public Boolean validateToken(String token){
         try{
             extractAllClaims(token);

@@ -2,9 +2,10 @@ package com.globallogix.flight.service;
 
 
 import com.globallogix.flight.client.DeliveryClient;
-import com.globallogix.flight.DeliveryDto;
+import com.globallogix.flight.dto.DeliveryDto;
 import com.globallogix.flight.entity.CourierProfile;
 import com.globallogix.flight.entity.CourierRoute;
+import com.globallogix.flight.exception.custom_exceptions.RoutesNotFoundException;
 import com.globallogix.flight.repository.CourierProfileRepository;
 import com.globallogix.flight.repository.CourierRouteRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,14 +25,12 @@ public class MatchingService {
     private final CourierRouteRepository courierRouteRepository;
 
     public List<DeliveryDto> findMatchingDeliveries(Long courierId){
-        log.info("Поиск подходящих заявок для курьера: {}", courierId);
+        log.debug("MATCHING-SERVICE: Поиск подходящих заявок для курьера: {}", courierId);
         CourierProfile profile = courierProfileRepository.findById(courierId)
                 .orElseThrow(() -> new RuntimeException("Courier`s profile not found"));
-        List<CourierRoute> routes = courierRouteRepository.findByUserId(courierId);
-        if (routes.isEmpty()){
-            log.warn("У курьера {} нет маршрутов", courierId);
-            return List.of();
-        }
+        List<CourierRoute> routes = courierRouteRepository.findByUserId(courierId)
+                .orElseThrow(() -> new RoutesNotFoundException("Courier`s routes not found"));
+
         List<DeliveryDto> allDeliveries = deliveryClient.getAvailableDeliveries();
         log.info("Получено {} доступных заявок", allDeliveries.size());
         return allDeliveries.stream()

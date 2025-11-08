@@ -31,7 +31,12 @@ public class GlobalExceptionHandler {
                         .message(e.getMessage())
                         .build());
     }
-
+    @ExceptionHandler({RuntimeException.class})
+    public ResponseEntity<?> handleRunTimeException(RuntimeException e){
+        log.error("Handle runtime exception");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body("?? Введенные данные уже зарегистрирваны в системе");
+    }
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<AuthResponse> handleUserNotFoundException(UserNotFoundException e){
         ResponseCookie deleteCookie = ResponseCookie.from("refresh", "")

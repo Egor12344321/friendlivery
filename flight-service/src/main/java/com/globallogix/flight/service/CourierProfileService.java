@@ -1,8 +1,9 @@
 package com.globallogix.flight.service;
 
 
-import com.globallogix.flight.CreateCourierProfileRequest;
+import com.globallogix.flight.dto.CreateCourierProfileRequest;
 import com.globallogix.flight.entity.CourierProfile;
+import com.globallogix.flight.exception.custom_exceptions.ProfileNotFoundException;
 import com.globallogix.flight.repository.CourierProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ public class CourierProfileService {
     }
 
     public CourierProfile getProfile(Long userId){
-        return courierProfileRepository.findByUserId(userId);
+        return courierProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new ProfileNotFoundException("Профиль с id: " + userId + " не найден"));
     }
 }

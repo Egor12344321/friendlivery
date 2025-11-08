@@ -7,6 +7,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.example.dto.PaymentEventDto;
 import org.example.service.PaymentService;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -14,49 +15,47 @@ import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
+@Service
 public class KafkaListenerService {
     private final ObjectMapper objectMapper;
     private final PaymentService paymentService;
 
     @KafkaListener(topics = "delivery.handover.confirmed")
-    public void handleHandoverConfirmed(String jsonEvent) {
+    public void handleHandoverConfirmed(ConsumerRecord<String, DeliveryEventDto> record) {
+
         try {
-            log.info("Received handover confirmed event: {}", jsonEvent);
+            log.info("Received handover confirmed: {}", record.value());
 
-            PaymentEventDto event = objectMapper.readValue(jsonEvent, PaymentEventDto.class);
-
+            DeliveryEventDto event = record.value();
             paymentService.createPayment(event);
-
         } catch (Exception e) {
-            log.error("Error processing handover confirmed event: {}", jsonEvent, e);
+            log.error("Error processing handover confirmed event: {}", record.value(), e);
         }
     }
 
     @KafkaListener(topics = "delivery.completed")
-    public void handleDeliveryCompleted(String jsonEvent) {
+    public void handleDeliveryCompleted(ConsumerRecord<String, DeliveryEventDto> record) {
         try {
-            log.info("Received delivery completed event: {}", jsonEvent);
+            log.info("Received delivery completed: {}", record.value());
 
-            PaymentEventDto event = objectMapper.readValue(jsonEvent, PaymentEventDto.class);
-
+            DeliveryEventDto event = record.value();
             paymentService.captureFunds(event);
-
         } catch (Exception e) {
-            log.error("Error processing delivery completed event: {}", jsonEvent, e);
+            log.error("Error processing delivery completed event: {}", record.value(), e);
         }
     }
 
     @KafkaListener(topics = "delivery.cancelled")
-    public void handleDeliveryCancelled(String jsonEvent) {
+    public void handleDeliveryCancelled(ConsumerRecord<String, DeliveryEventDto> record) {
+
         try {
-            log.info("Received delivery cancelled event: {}", jsonEvent);
-
-            PaymentEventDto event = objectMapper.readValue(jsonEvent, PaymentEventDto.class);
-
+            log.info("Received delivery cancelled: {}", record.value());
+            DeliveryEventDto event = record.value();
             paymentService.refundFunds(event);
-
         } catch (Exception e) {
-            log.error("Error processing delivery cancelled event: {}", jsonEvent, e);
+            log.error("Error processing delivery cancelled event: {}", record.value(), e);
         }
     }
+
+
 }

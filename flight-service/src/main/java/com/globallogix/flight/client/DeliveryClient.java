@@ -1,7 +1,7 @@
 package com.globallogix.flight.client;
 
 
-import com.globallogix.flight.DeliveryDto;
+import com.globallogix.flight.dto.DeliveryDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

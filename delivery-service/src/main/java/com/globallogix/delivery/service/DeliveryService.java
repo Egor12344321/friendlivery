@@ -79,6 +79,7 @@ public class DeliveryService {
 
     @Cacheable(value = "deliveries", key = "#deliveryId")
     public DeliveryResponse getDelivery(Long deliveryId){
+        log.info("Getting delivery with id: {}", deliveryId);
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() -> new DeliveryNotFoundException("Delivery not found"));
         return mapToDeliveryResponse(delivery);
@@ -87,6 +88,7 @@ public class DeliveryService {
 
 
     public List<DeliveryResponse> getUserDeliveries(Long userId){
+        log.debug("Getting user's: {} deliveries started", userId);
         try {
             List<Delivery> deliveries = deliveryRepository.findBySenderId(userId);
             return deliveries.stream().map(this::mapToDeliveryResponse).toList();
@@ -96,6 +98,7 @@ public class DeliveryService {
     }
 
     public List<DeliveryResponse> getAllDeliveries(){
+        log.debug("Getting all deliveries");
         try {
             List<Delivery> deliveries = deliveryRepository.findAll();
             return deliveries.stream().map(this::mapToDeliveryResponse).toList();
@@ -105,6 +108,7 @@ public class DeliveryService {
     }
 
     public List<DeliveryResponse> findAvailableDeliveries(){
+        log.debug("Getting all available deliveries");
         try {
             List<Delivery> deliveries = deliveryRepository.findByStatusAndCourierIdIsNull(DeliveryStatus.SEARCHING);
             return deliveries.stream().map(this::mapToDeliveryResponse).toList();
@@ -114,7 +118,7 @@ public class DeliveryService {
     }
 
     public DeliveryResponse assignToDelivery(Long courierId, Long deliveryId){
-
+        log.info("Assign to delivery started");
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() -> new RuntimeException("Delivery not found"));
 
@@ -127,7 +131,7 @@ public class DeliveryService {
         delivery.setUpdatedAt(LocalDateTime.now());
 
         Delivery updatedDelivery = deliveryRepository.save(delivery);
-
+        log.info("Delivery saved to db");
         return mapToDeliveryResponse(updatedDelivery);
     }
 
@@ -138,13 +142,18 @@ public class DeliveryService {
     }
 
 
-    public void deleteDelivery(Long deliveryId) {
-
+    public void deleteDelivery(Long deliveryId, Long userId) {
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+                .orElseThrow(() -> new DeliveryNotFoundException("Delivery not found"));
+        if (!delivery.getSenderId().equals(userId)){
+            throw new RuntimeException("Not authorized");
+        }
         deliveryRepository.deleteById(deliveryId);
-        deliveryKafkaProducer.
+        deliveryKafkaProducer.sendDeliveryCancelled(delivery);
     }
 
     public Delivery confirmDeliveryBySender(Long deliveryId, Long senderId) {
+        log.debug("SERVICE: confirmDeliveryBySender started");
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() -> new DeliveryNotFoundException("Delivery not found"));
         if (!delivery.getSenderId().equals(senderId)){
@@ -152,17 +161,13 @@ public class DeliveryService {
         }
         delivery.setStatus(DeliveryStatus.PICKUP_PENDING);
         delivery.setSenderAcceptedAt(LocalDateTime.now());
-        Map<String, Object> event = Map.of(
-                "deliveryId", delivery.getId(),
-                "senderId", delivery.getSenderId(),
-                "amount", delivery.getPrice().toString(),
-                "reason", "Товар передан курьеру"
-        );
+
         deliveryKafkaProducer.sendHandoverConfirmed(delivery);
         return deliveryRepository.save(delivery);
     }
 
     public Delivery confirmDeliveryByCourier(Long deliveryId, Long courierId) {
+        log.debug("SERVICE: confirmDeliveryByCourier started");
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() -> new DeliveryNotFoundException("Delivery not found"));
         if (!delivery.getCourierId().equals(courierId)){
@@ -174,6 +179,8 @@ public class DeliveryService {
     }
 
     public Delivery confirmDelivery(Long deliveryId, Long courierId) {
+        log.debug("SERVICE: confirmDeliveryArrive by courier started");
+
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() -> new DeliveryNotFoundException("Delivery not found"));
         if (!delivery.getCourierId().equals(courierId)){
@@ -184,6 +191,8 @@ public class DeliveryService {
     };
 
     public Delivery confirmArriveDelivery(Long deliveryId, Long senderId) {
+        log.debug("SERVICE: confirmDeliveryArrive by sender started");
+
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() -> new DeliveryNotFoundException("Delivery not found"));
         if (!delivery.getSenderId().equals(senderId)){

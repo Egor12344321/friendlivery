@@ -48,11 +48,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         jwt = authHeader.substring(7);
+        log.info("JwtAuthFilter: Получен токен: {}", jwt);
         try {
+
             username = jwtUtil.extractUsername(jwt);
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() != null){
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null){
+                log.info("Аутентификация отсутствует, проверяем токен для пользователя: {}", username);
                 if (jwtUtil.validateToken(jwt)){
-                    log.info("Token valid");
+                    log.info("Token valid {}", username);
                     UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
@@ -61,6 +64,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     );
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+                    log.info("Установлена аутентификация для пользователя: {}", username);
+                }
+            } else {
+                if (username == null) {
+                    log.warn("Не удалось извлечь username из токена");
+                } else {
+                    log.info("Аутентификация уже установлена для пользователя: {}", username);
                 }
             }
         } catch (Exception e){

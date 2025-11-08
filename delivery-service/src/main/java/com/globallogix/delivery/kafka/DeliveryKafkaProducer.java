@@ -4,6 +4,7 @@ package com.globallogix.delivery.kafka;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.globallogix.delivery.entity.Delivery;
 import com.globallogix.delivery.kafka.events.DeliveryCreatedEvent;
+import com.globallogix.delivery.kafka.events.DeliveryEventDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -17,61 +18,48 @@ import java.util.Map;
 @RequiredArgsConstructor
 
 public class DeliveryKafkaProducer {
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaTemplate<String, DeliveryEventDto> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
 
     public void sendDeliveryCreated(Delivery delivery) {
-        Map<String, Object> event = Map.of(
-                "eventType", "DELIVERY_CREATED",
-                "deliveryId", delivery.getId(),
-                "senderId", delivery.getSenderId(),
-                "price", delivery.getPrice().toString()
-        );
-
+        DeliveryEventDto event = mapDeliveryToEvent(delivery, "DELIVERY_CREATED");
         sendEvent("delivery.created", event);
     }
 
     public void sendHandoverConfirmed(Delivery delivery) {
-        Map<String, Object> event = Map.of(
-                "eventType", "HANDOVER_CONFIRMED",
-                "deliveryId", delivery.getId(),
-                "senderId", delivery.getSenderId(),
-                "courierId", delivery.getCourierId(),
-                "price", delivery.getPrice().toString()
-        );
-
+        DeliveryEventDto event = mapDeliveryToEvent(delivery, "HANDOVER_CONFIRMED");
         sendEvent("delivery.handover.confirmed", event);
     }
 
     public void sendDeliveryCompleted(Delivery delivery) {
-        Map<String, Object> event = Map.of(
-                "eventType", "DELIVERY_COMPLETED",
-                "deliveryId", delivery.getId(),
-                "courierId", delivery.getCourierId(),
-                "price", delivery.getPrice().toString()
-        );
-
+        DeliveryEventDto event = mapDeliveryToEvent(delivery, "DELIVERY_COMPLETED");
         sendEvent("delivery.completed", event);
     }
+
+
     public void sendDeliveryCancelled(Delivery delivery) {
-        Map<String, Object> event = Map.of(
-                "eventType", "DELIVERY_CANCELLED",
-                "deliveryId", delivery.getId(),
-                "courierId", delivery.getCourierId(),
-                "price", delivery.getPrice().toString()
-        );
-
-        sendEvent("delivery.completed", event);
+        DeliveryEventDto event = mapDeliveryToEvent(delivery, "DELIVERY_CANCELLED");
+        sendEvent("delivery.cancelled", event);
     }
 
-    private void sendEvent(String topic, Map<String, Object> event) {
+    private void sendEvent(String topic, DeliveryEventDto event) {
         try {
-            String jsonEvent = objectMapper.writeValueAsString(event);
-            kafkaTemplate.send(topic, jsonEvent);
-            log.info("Sent to {}: {}", topic, jsonEvent);
+            kafkaTemplate.send(topic, event);
+            log.info("Sent to {}: {}", topic, event);
         } catch (Exception e) {
             log.error("Failed to send event to {}", topic, e);
         }
+    }
+    private DeliveryEventDto mapDeliveryToEvent(Delivery delivery, String eventType) {
+        DeliveryEventDto event = new DeliveryEventDto(eventType, delivery.getId());
+
+        event.setSenderId(delivery.getSenderId());
+        event.setCourierId(delivery.getCourierId());
+        event.setPrice(delivery.getPrice());
+        event.setFromAirport(delivery.getToAirport());
+        event.setToAirport(delivery.getToAirport());
+
+        return event;
     }
 }

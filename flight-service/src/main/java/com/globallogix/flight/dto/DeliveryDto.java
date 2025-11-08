@@ -1,4 +1,4 @@
-package com.globallogix.flight;
+package com.globallogix.flight.dto;
 
 import lombok.Data;
 import java.math.BigDecimal;

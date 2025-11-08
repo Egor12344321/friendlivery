@@ -32,23 +32,36 @@ public class RefreshTokenService {
         return  refreshCookie;
     }
 
-    public UpdateTokens updateTokens(String refresh){
-        String username = jwtUtil.extractUsername(refresh);
-        String refreshFromRedis = refreshRedisService.getRefreshTokenFromCache(username)
-                .orElseThrow(() -> new TokenNotFoundException("Токен не найден"));
-        if (jwtUtil.validateToken(refresh) && refresh.equals(refreshFromRedis)){
-            User user = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new UserNotFoundException("Пользователь с таким username не найден"));
-            refreshRedisService.deleteTokenFromCache(username);
-            String updatedRefresh = jwtUtil.generateRefreshToken(user);
-            refreshRedisService.saveRefreshToCache(updatedRefresh, username);
-            return UpdateTokens.builder()
-                    .accessToken(jwtUtil.generateToken(user))
-                    .refreshToken(updatedRefresh)
-                    .message("Токены обновлены")
-                    .build();
-        }
-        throw new InvalidTokenRefreshException("Токен невалидный");
+    public UpdateTokens updateTokens(String refresh) {
+            log.info("SERVICE: Updating tokens");
+            String username = jwtUtil.extractUsername(refresh);
+            if (!jwtUtil.validateToken(refresh)){
+                throw new InvalidTokenRefreshException("Срок действия рефршен токена истек, надо заново регистрироваться");
+            }
+            String refreshFromRedis = refreshRedisService.getRefreshTokenFromCache(username)
+                    .orElseThrow(() -> new TokenNotFoundException("Токен не найден"));
+            log.info("Токен из кук найден и является валидным для пользователя: {}", username);
+            log.info("Токен из кук: {}", refresh);
+            log.info("Токен из cache найден и является валидным для пользователя: {}", jwtUtil.extractUsername(refreshFromRedis));
+            log.info("Токен из Redis: {}", refreshFromRedis);
+
+            if (jwtUtil.validateToken(refresh) && refresh.equals(refreshFromRedis)) {
+                User user = userRepository.findByUsername(username)
+                        .orElseThrow(() -> new UserNotFoundException("Пользователь с таким username не найден"));
+
+                String updatedRefresh = jwtUtil.generateRefreshToken(user);
+                refreshRedisService.saveRefreshToCache(updatedRefresh, username);
+
+                return UpdateTokens.builder()
+                        .accessToken(jwtUtil.generateToken(user))
+                        .refreshToken(updatedRefresh)
+                        .message("Токены обновлены")
+                        .build();
+            }
+            log.error("Рефреш в редисе и в куках не совпадает");
+            throw new InvalidTokenRefreshException("Токены в куках и редисе не совпадают");
+
+
     }
 
 

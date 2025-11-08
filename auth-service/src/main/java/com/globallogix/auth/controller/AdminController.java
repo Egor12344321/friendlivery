@@ -30,7 +30,7 @@ public class AdminController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/kyc/approve/{userId}")
+    @PostMapping("/kyc/cancel/{userId}")
     public void cancelVerification(@PathVariable Long userId){
         adminService.cancelVerification(userId);
         log.info("Статус верификации пользователя изменен на CANCELLED");

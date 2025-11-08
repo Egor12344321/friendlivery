@@ -8,6 +8,7 @@ import org.example.dto.YooKassaPaymentRequest;
 import org.example.dto.YooKassaPaymentResponse;
 import org.example.entity.Payment;
 import org.example.entity.PaymentStatus;
+import org.example.kafka.DeliveryEventDto;
 import org.example.repository.PaymentRepository;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
@@ -24,8 +25,7 @@ public class PaymentService {
     private final YokassaClient yokassaClient;
     private final PaymentRepository paymentRepository;
 
-    @KafkaListener(topics = "delivery.created")
-    public void createPayment(PaymentEventDto event){
+    public void createPayment(DeliveryEventDto event){
         log.info("Creating payment");
 
         try{
@@ -58,7 +58,7 @@ public class PaymentService {
     }
 
 
-    public void captureFunds(PaymentEventDto event) {
+    public void captureFunds(DeliveryEventDto event) {
         try {
             log.info("Capturing funds for delivery: {}, courier: {}, amount: {}",
                     event.getDeliveryId(), event.getCourierId(), event.getPrice());
@@ -85,7 +85,7 @@ public class PaymentService {
     }
 
 
-    public void refundFunds(PaymentEventDto event) {
+    public void refundFunds(DeliveryEventDto event) {
         try {
             log.info("Refunding funds for delivery: {}", event.getDeliveryId());
 
