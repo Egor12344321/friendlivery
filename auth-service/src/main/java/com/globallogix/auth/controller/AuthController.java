@@ -5,7 +5,6 @@ import com.globallogix.auth.dto.request.AuthRequest;
 import com.globallogix.auth.dto.request.RegisterRequest;
 import com.globallogix.auth.dto.response.AuthResponse;
 import com.globallogix.auth.dto.response.UpdateTokens;
-import com.globallogix.auth.dto.response.ValidationResponse;
 import com.globallogix.auth.exception.InvalidTokenRefreshException;
 import com.globallogix.auth.security.JwtUtil;
 import com.globallogix.auth.service.AuthService;

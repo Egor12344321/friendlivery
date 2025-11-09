@@ -4,6 +4,7 @@ import com.globallogix.delivery.dto.request.DeliveryRequest;
 import com.globallogix.delivery.dto.response.DeliveryResponse;
 import com.globallogix.delivery.entity.Delivery;
 import com.globallogix.delivery.service.DeliveryService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/api/deliveries")
 @RequiredArgsConstructor
+@Tag(name = "Delivery Management", description = "APIs for managing deliveries")
 public class DeliveryController {
     private final DeliveryService deliveryService;
 

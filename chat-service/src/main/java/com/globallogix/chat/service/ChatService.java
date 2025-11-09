@@ -3,7 +3,6 @@ package com.globallogix.chat.service;
 
 import com.globallogix.chat.entity.Chat;
 import com.globallogix.chat.entity.ChatMessage;
-import com.globallogix.chat.kafka.events.DeliveryEventDto;
 import com.globallogix.chat.repository.ChatMessageRepository;
 import com.globallogix.chat.repository.ChatRepository;
 import jakarta.transaction.Transactional;
@@ -12,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service

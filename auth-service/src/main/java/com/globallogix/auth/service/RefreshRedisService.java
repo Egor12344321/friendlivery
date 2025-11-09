@@ -1,6 +1,5 @@
 package com.globallogix.auth.service;
 
-import com.globallogix.auth.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;

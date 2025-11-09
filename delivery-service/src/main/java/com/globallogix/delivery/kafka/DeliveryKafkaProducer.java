@@ -20,27 +20,32 @@ public class DeliveryKafkaProducer {
     public void sendDeliveryCreated(Delivery delivery) {
         DeliveryEventDto event = mapDeliveryToEvent(delivery, "DELIVERY_CREATED");
         sendEvent("delivery.created", event);
+        log.info("Delivery DELIVERY_CREATED event sent to kafka");
     }
 
     public void sendHandoverConfirmed(Delivery delivery) {
         DeliveryEventDto event = mapDeliveryToEvent(delivery, "HANDOVER_CONFIRMED");
         sendEvent("delivery.handover.confirmed", event);
+        log.info("Delivery HANDOVER_CONFIRMED event sent to kafka");
     }
 
     public void sendDeliveryCompleted(Delivery delivery) {
         DeliveryEventDto event = mapDeliveryToEvent(delivery, "DELIVERY_COMPLETED");
         sendEvent("delivery.completed", event);
+        log.info("Delivery DELIVERY_COMPLETED event sent to kafka");
     }
 
     public void sendDeliveryAssigned(Delivery delivery){
         DeliveryEventDto event = mapDeliveryToEvent(delivery, "DELIVERY_ASSIGNED");
         sendEvent("delivery.assigned", event);
+        log.info("Delivery DELIVERY_ASSIGNED event sent to kafka");
     }
 
 
     public void sendDeliveryCancelled(Delivery delivery) {
         DeliveryEventDto event = mapDeliveryToEvent(delivery, "DELIVERY_CANCELLED");
         sendEvent("delivery.cancelled", event);
+        log.info("Delivery DELIVERY_CANCELLED event sent to kafka");
     }
 
     private void sendEvent(String topic, DeliveryEventDto event) {

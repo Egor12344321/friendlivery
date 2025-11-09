@@ -11,14 +11,13 @@ import com.globallogix.delivery.repository.DeliveryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +44,8 @@ public class DeliveryService {
         Delivery savedDelivery = deliveryRepository.save(delivery);
         log.info("Delivery saved to db successfully");
         deliveryKafkaProducer.sendDeliveryCreated(delivery);
-        log.info("Delivery creation event sent to kafka");
+
+
         return mapToDeliveryResponse(savedDelivery);
     }
 
@@ -78,7 +78,6 @@ public class DeliveryService {
                 .setScale(0, RoundingMode.UP);
     }
 
-    @Cacheable(value = "deliveries", key = "#deliveryId")
     public DeliveryResponse getDelivery(Long deliveryId){
         log.info("Getting delivery with id: {}", deliveryId);
         Delivery delivery = deliveryRepository.findById(deliveryId)
@@ -155,6 +154,7 @@ public class DeliveryService {
             throw new RuntimeException("Not authorized");
         }
         deliveryRepository.deleteById(deliveryId);
+        log.info("Delivery deleted from db");
         deliveryKafkaProducer.sendDeliveryCancelled(delivery);
     }
 
