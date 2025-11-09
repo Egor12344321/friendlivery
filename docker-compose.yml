@@ -90,6 +90,44 @@ services:
     networks:
       - global-logix-network
 
+  notifications-service:
+    build: ./notifications-service
+    container_name: notifications-service
+    ports:
+      - "8086:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/globallogix
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: egor
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_REDIS_HOST: redis-cache
+      SPRING_REDIS_PORT: 6379
+      SERVER_PORT: 8080
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - global-logix-network
+
+  chat-service:
+    build: ./chat-service
+    container_name: chat-service
+    ports:
+      - "8087:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/globallogix
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: egor
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_REDIS_HOST: redis-cache
+      SPRING_REDIS_PORT: 6379
+      SERVER_PORT: 8080
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - global-logix-network
+
   flight-service:
     build: ./flight-service
     container_name: flight-service

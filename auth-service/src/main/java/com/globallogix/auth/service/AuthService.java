@@ -35,15 +35,12 @@ public class AuthService {
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()){
             log.info("Ошибка регистрации из-за не идентичного мейла: {}", request.getEmail());
-            System.out.println(1);
             throw new RuntimeException("Пользователь с таким email уже существует");
         }
         if (userRepository.findByUsername(request.getUsername()).isPresent()){
             log.info("Ошибка регистрации из-за не идентичности username: {}", request.getUsername());
-            System.out.println(4);
             throw new RuntimeException("Пользователь с таким username существует");
         }
-        System.out.println(3);
         User user = User.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -54,21 +51,20 @@ public class AuthService {
                 .enabled(true)
                 .roles(Set.of(UserRoles.USER))
                 .build();
-        System.out.println(5);
         User savedUser = userRepository.save(user);
-        System.out.println(6);
+
         log.info("Пользователь {} успешно зарегистрирован", savedUser.getId());
 
         String jwtToken = jwtUtil.generateToken(savedUser);
         log.info("AccessToken generated successfully");
-        System.out.println(7);
+
         String refreshToken = jwtUtil.generateRefreshToken(savedUser);
         log.info("RefreshToken generated successfully");
-        System.out.println(8);
+
 
         refreshRedisService.saveRefreshToCache(refreshToken, user.getUsername());
         log.info("Refresh token saved in cache successfully");
-        System.out.println(9);
+
 
         return AuthResponse.builder()
                 .accessToken(jwtToken)

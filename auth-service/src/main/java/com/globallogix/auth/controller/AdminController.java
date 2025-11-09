@@ -25,8 +25,8 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/kyc/approve/{userId}")
     public void approveVerification(@PathVariable Long userId){
-
-        log.info("Статус верификации пользователя изменен на VERIFIED");
+        adminService.approveVerification(userId);
+        log.info("Статус верификации пользователя: {} изменен на VERIFIED", userId);
     }
 
     @PreAuthorize("hasRole('ADMIN')")

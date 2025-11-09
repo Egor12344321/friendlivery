@@ -1,17 +1,12 @@
 package com.globallogix.delivery.kafka;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.globallogix.delivery.entity.Delivery;
-import com.globallogix.delivery.kafka.events.DeliveryCreatedEvent;
 import com.globallogix.delivery.kafka.events.DeliveryEventDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
 
 @Service
 @Slf4j

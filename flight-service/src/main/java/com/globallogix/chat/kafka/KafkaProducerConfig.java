@@ -1,8 +1,8 @@
-package com.globallogix.delivery.kafka;
+package com.globallogix.chat.kafka;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.globallogix.delivery.kafka.events.DeliveryEventDto;
+import com.globallogix.chat.kafka.events.DeliveryEventDto;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.context.annotation.Bean;

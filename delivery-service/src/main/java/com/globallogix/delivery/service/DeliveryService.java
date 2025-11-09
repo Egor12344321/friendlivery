@@ -145,8 +145,12 @@ public class DeliveryService {
 
 
     public void deleteDelivery(Long deliveryId, Long userId) {
+        log.debug("SERVICE: Starting removal delivery: {}", deliveryId);
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() -> new DeliveryNotFoundException("Delivery not found"));
+        if (delivery.getStatus() != DeliveryStatus.SEARCHING && delivery.getStatus() != DeliveryStatus.CREATED || delivery.getCourierId() != null) {
+            throw new RuntimeException("Delivery is not available to delete");
+        }
         if (!delivery.getSenderId().equals(userId)){
             throw new RuntimeException("Not authorized");
         }

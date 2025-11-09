@@ -108,7 +108,7 @@ public class DeliveryController {
     public void deleteDelivery(@PathVariable Long deliveryId,
                                @RequestHeader("X-User-Id") String userIdStr) {
         Long userId = parseUserId(userIdStr);
-        log.info("Удаление доставки {} пользователем {}", deliveryId, userId);
+        log.info("CONTROLLER: Удаление доставки {} пользователем {}", deliveryId, userId);
         deliveryService.deleteDelivery(deliveryId, userId);
     }
 }
