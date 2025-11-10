@@ -2,6 +2,7 @@ package com.globallogix.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.globallogix.kafka.events.DeliveryEventDto;
+import com.globallogix.kafka.events.PaymentEventDto;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.context.annotation.Bean;
@@ -48,6 +49,37 @@ public class KafkaConsumerConfig {
             ConsumerFactory<String, DeliveryEventDto> consumerFactory
     ) {
         var containerFactory = new ConcurrentKafkaListenerContainerFactory<String, DeliveryEventDto>();
+        containerFactory.setConcurrency(1);
+        containerFactory.setConsumerFactory(consumerFactory);
+        return containerFactory;
+    }
+
+    @Bean
+    public ConsumerFactory<String, PaymentEventDto> paymentConsumerFactory(
+            ObjectMapper objectMapper
+    ) {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "notification-group");
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
+        props.put(ConsumerConfig.RECONNECT_BACKOFF_MS_CONFIG, 1000);
+        props.put(ConsumerConfig.RECONNECT_BACKOFF_MAX_MS_CONFIG, 10000);
+
+        JsonDeserializer<PaymentEventDto> jsonDeserializer =
+                new JsonDeserializer<>(PaymentEventDto.class, objectMapper);
+
+        return new DefaultKafkaConsumerFactory<>(
+                props,
+                new StringDeserializer(),
+                jsonDeserializer
+        );
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, PaymentEventDto> paymentKafkaListenerContainerFactory(
+            ConsumerFactory<String, PaymentEventDto> consumerFactory
+    ) {
+        var containerFactory = new ConcurrentKafkaListenerContainerFactory<String, PaymentEventDto>();
         containerFactory.setConcurrency(1);
         containerFactory.setConsumerFactory(consumerFactory);
         return containerFactory;

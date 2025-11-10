@@ -3,15 +3,16 @@ package org.example.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.dto.PaymentEventDto;
+
 import org.example.dto.YooKassaPaymentRequest;
 import org.example.dto.YooKassaPaymentResponse;
 import org.example.entity.Payment;
 import org.example.entity.PaymentStatus;
 import org.example.kafka.DeliveryEventDto;
+import org.example.kafka.PaymentEventDto;
 import org.example.repository.PaymentRepository;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.stereotype.Component;
+import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -24,6 +25,7 @@ import java.util.Map;
 public class PaymentService {
     private final YokassaClient yokassaClient;
     private final PaymentRepository paymentRepository;
+    private final KafkaTemplate<String, PaymentEventDto> kafkaTemplate;
 
     public void createPayment(DeliveryEventDto event){
         log.info("Creating payment");
@@ -51,7 +53,8 @@ public class PaymentService {
 
             paymentRepository.save(payment);
             log.info("Payment saved successfully");
-
+            kafkaTemplate.send("payment-notification", new PaymentEventDto(event.getSenderId(), response.confirmation().confirmationUrl(), event.getDeliveryId()));
+            log.info("PAYMENT-SERVICE: Payment confirmation url sent to kafka");
         } catch (Exception e){
             log.error("Failed to create payment for delivery: {}", event.getDeliveryId());
         }

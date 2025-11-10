@@ -2,10 +2,7 @@ package com.globallogix.auth.entity;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,7 +13,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Builder
 @NoArgsConstructor
@@ -61,10 +59,14 @@ public class User implements UserDetails {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+
     @PrePersist
     protected void onCreate() {
+        rating = 5.0;
+        boolean enabled = true;
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        verificationStatus = VerificationStatus.NOT_VERIFIED;
         if (this.roles.isEmpty()) {
             this.roles.add(UserRoles.USER);
         }

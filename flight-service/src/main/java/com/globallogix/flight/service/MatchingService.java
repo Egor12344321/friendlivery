@@ -86,10 +86,13 @@ public class MatchingService {
             log.info("No courier routes found");
             return;
         }
-
+        log.info("Найдено всего routes: {}", routes.size());
         for (CourierRoute route : routes) {
+            log.info("Route: {}, fromAirport: {}, toAirport: {}; Delivery: fromAirport: {}, toAirport: {}", route.getId(), route.getDepartureAirport(), route.getArrivalAirport(), event.getFromAirport(), event.getToAirport());
+
             if (route.getDepartureAirport().equals(event.getFromAirport()) &&
-                    route.getArrivalAirport().equals(event.getToAirport())) {
+                    route.getArrivalAirport().equals(event.getToAirport()) && event.getDeliveryDeadline().isAfter(route.getFlightDate())) {
+                log.info("Detect match route: {}", route.getId());
                 notifyCourier(route.getUserId(), event);
 
             }
@@ -98,6 +101,7 @@ public class MatchingService {
 
     private void notifyCourier(Long userId, DeliveryEventDto event) {
         log.info("Notification to matched courier creation: {}", userId);
+        event.setCourierId(userId);
         kafkaTemplate.send("courier.notifications", event);
     }
 }

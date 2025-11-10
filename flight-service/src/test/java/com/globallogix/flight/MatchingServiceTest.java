@@ -87,16 +87,19 @@ class MatchingServiceTest {
         event.setDeliveryId(1L);
         event.setFromAirport("SVO");
         event.setToAirport("JFK");
+        event.setDeliveryDeadline(LocalDate.parse("2025-12-12"));
 
         CourierRoute matchingRoute = new CourierRoute();
         matchingRoute.setUserId(123L);
         matchingRoute.setDepartureAirport("SVO");
         matchingRoute.setArrivalAirport("JFK");
+        matchingRoute.setFlightDate(LocalDate.parse("2025-11-11"));
 
         CourierRoute nonMatchingRoute = new CourierRoute();
         nonMatchingRoute.setUserId(456L);
         nonMatchingRoute.setDepartureAirport("LED");
         nonMatchingRoute.setArrivalAirport("CDG");
+        nonMatchingRoute.setFlightDate(LocalDate.parse("2024-11-11"));
 
         when(courierRouteRepository.findAll()).thenReturn(List.of(matchingRoute, nonMatchingRoute));
 

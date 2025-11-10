@@ -51,6 +51,7 @@ public class Delivery {
 
     @PrePersist
     protected void onCreate() {
+        status = DeliveryStatus.CREATED;
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }

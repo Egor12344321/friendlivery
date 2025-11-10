@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
@@ -18,6 +19,7 @@ public class DeliveryEventDto {
     private BigDecimal price;
     private String fromAirport;
     private String toAirport;
+    private LocalDate deliveryDeadline;
 
 
     public DeliveryEventDto() {

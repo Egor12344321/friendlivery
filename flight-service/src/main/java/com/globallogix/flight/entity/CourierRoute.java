@@ -36,6 +36,7 @@ public class CourierRoute {
 
     @PrePersist
     protected void onCreate(){
+        isActive = true;
         createdAt = LocalDateTime.now();
     }
 }

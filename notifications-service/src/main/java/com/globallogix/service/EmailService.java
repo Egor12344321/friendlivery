@@ -2,6 +2,7 @@ package com.globallogix.service;
 
 
 import com.globallogix.kafka.events.DeliveryEventDto;
+import com.globallogix.kafka.events.PaymentEventDto;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +31,7 @@ public class EmailService {
             Стоимость: %s
             
             Успейте первым - доставки быстро разбирают!""".formatted(route, price);
-        log.info("EMAIL-SERVICE: Sending delivery offer");
+        log.info("EMAIL-SERVICE: Sending delivery offer to {}", email);
 //        sendSimpleMail(email, subject, text);
     }
     public void sendDeliveryCreated(DeliveryEventDto event, String email){
@@ -38,7 +39,7 @@ public class EmailService {
         String text = """
                 Congratulations! Your delivery: %s created successfully
                 """.formatted(event.getDeliveryId());
-        log.info("EMAIL-SERVICE: Sending delivery creation");
+        log.info("EMAIL-SERVICE: Sending delivery creation to: {}", email);
 //        sendSimpleMail(email, subject, text);
     }
 //    private void sendSimpleMail(String email, String subject, String text) {
@@ -55,6 +56,10 @@ public class EmailService {
 //            log.info("Sending mail failed");
 //        }
 //    }
+    public void sendMatchedDelivery(DeliveryEventDto event, String courierEmail) {
+        String subject = "New matched delivery " + event.getDeliveryId();
+        log.info("NOTIFICATION_matched: To: {}, Subject: {}", courierEmail, subject);
+    }
 
     public void sendDeliveryAssigned(DeliveryEventDto event, String courierEmail) {
         String subject = "Delivery Assigned " + event.getDeliveryId();
@@ -89,5 +94,10 @@ public class EmailService {
     public void sendDeliveryCancelledToCourier(DeliveryEventDto event, String email) {
         String subject = "Delivery Cancelled " + event.getDeliveryId();
         log.info("NOTIFICATION7: To: {}, Subject: {}", email, subject);
+    }
+
+    public void sendPaymentUrl(PaymentEventDto event, String senderEmail) {
+        String subject = "Payment for delivery: " + event.getDeliveryId();
+        log.info("NOTIFICATION8: To: {}, Subject: {}", senderEmail, subject);
     }
 }

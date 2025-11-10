@@ -62,8 +62,9 @@ public class DeliveryKafkaProducer {
         event.setSenderId(delivery.getSenderId());
         event.setCourierId(delivery.getCourierId());
         event.setPrice(delivery.getPrice());
-        event.setFromAirport(delivery.getToAirport());
+        event.setFromAirport(delivery.getFromAirport());
         event.setToAirport(delivery.getToAirport());
+        event.setDeliveryDeadline(delivery.getDeliveryDeadline());
 
         return event;
     }
