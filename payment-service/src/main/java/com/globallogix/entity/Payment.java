@@ -1,4 +1,4 @@
-package org.example.entity;
+package com.globallogix.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

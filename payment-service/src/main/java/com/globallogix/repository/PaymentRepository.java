@@ -1,6 +1,6 @@
-package org.example.repository;
+package com.globallogix.repository;
 
-import org.example.entity.Payment;
+import com.globallogix.entity.Payment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

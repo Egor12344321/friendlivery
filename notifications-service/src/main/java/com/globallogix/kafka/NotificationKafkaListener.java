@@ -118,8 +118,12 @@ public class NotificationKafkaListener {
     }
 
 
-    @KafkaListener(topics = "payment-notification")
+    @KafkaListener(topics = "payment-notification",
+            containerFactory = "paymentKafkaListenerContainerFactory")
     public void sendPaymentUrlToSender(ConsumerRecord<String, PaymentEventDto> record){
+        log.info("DEBUG - Topic: {}, Value type: {}",
+                record.topic(), record.value().getClass());
+
         PaymentEventDto event = record.value();
         try {
             log.info("Sending confirmation url to sender: {}", event.getUserId());

@@ -1,4 +1,4 @@
-package org.example.entity;
+package com.globallogix.entity;
 
 public enum PaymentStatus {
     PENDING,

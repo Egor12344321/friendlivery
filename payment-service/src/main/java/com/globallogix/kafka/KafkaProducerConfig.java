@@ -1,9 +1,10 @@
-package org.example.kafka;
+package com.globallogix.kafka;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
+import com.globallogix.kafka.events.PaymentEventDto;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
@@ -24,7 +25,7 @@ public class KafkaProducerConfig {
         configProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
 
         JsonSerializer<PaymentEventDto> serializer = new JsonSerializer<>(objectMapper);
-        serializer.setAddTypeInfo(false);
+
 
         return new DefaultKafkaProducerFactory<>(
                 configProperties,

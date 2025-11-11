@@ -42,7 +42,7 @@ public class Delivery {
     private Double weight;
     private LocalDateTime courierAcceptedAt;
     private LocalDateTime senderAcceptedAt;
-    private DeliveryStatus status = DeliveryStatus.CREATED;
+    private DeliveryStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -51,7 +51,6 @@ public class Delivery {
 
     @PrePersist
     protected void onCreate() {
-        status = DeliveryStatus.CREATED;
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }

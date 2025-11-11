@@ -1,17 +1,16 @@
-package org.example.service;
+package com.globallogix.service;
 
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.example.dto.YooKassaPaymentRequest;
-import org.example.dto.YooKassaPaymentResponse;
-import org.example.entity.Payment;
-import org.example.entity.PaymentStatus;
-import org.example.kafka.DeliveryEventDto;
-import org.example.kafka.PaymentEventDto;
-import org.example.repository.PaymentRepository;
-import org.springframework.http.ResponseEntity;
+import com.globallogix.dto.YooKassaPaymentRequest;
+import com.globallogix.dto.YooKassaPaymentResponse;
+import com.globallogix.entity.Payment;
+import com.globallogix.entity.PaymentStatus;
+import com.globallogix.kafka.DeliveryEventDto;
+import com.globallogix.kafka.events.PaymentEventDto;
+import com.globallogix.repository.PaymentRepository;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -53,8 +52,11 @@ public class PaymentService {
 
             paymentRepository.save(payment);
             log.info("Payment saved successfully");
-            kafkaTemplate.send("payment-notification", new PaymentEventDto(event.getSenderId(), response.confirmation().confirmationUrl(), event.getDeliveryId()));
-            log.info("PAYMENT-SERVICE: Payment confirmation url sent to kafka");
+            PaymentEventDto paymentDto = new PaymentEventDto(event.getSenderId(), response.confirmation().confirmationUrl(), event.getDeliveryId());
+            log.info("SENDING PaymentEventDto: userId={}, url={}, deliveryId={}",
+                    paymentDto.getUserId(), paymentDto.getConfirmationUrl(), paymentDto.getDeliveryId());
+            kafkaTemplate.send("payment-notification", paymentDto);
+            log.info("PAYMENT-SERVICE: Payment confirmation url sent to kafka, {}", paymentDto.getClass());
         } catch (Exception e){
             log.error("Failed to create payment for delivery: {}", event.getDeliveryId());
         }

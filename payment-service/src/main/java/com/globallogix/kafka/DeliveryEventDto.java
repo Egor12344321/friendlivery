@@ -1,4 +1,4 @@
-package org.example.kafka;
+package com.globallogix.kafka;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

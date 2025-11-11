@@ -1,11 +1,10 @@
-package org.example.service;
+package com.globallogix.service;
 
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.dto.YooKassaPaymentRequest;
-import org.example.dto.YooKassaPaymentResponse;
+import com.globallogix.dto.YooKassaPaymentRequest;
+import com.globallogix.dto.YooKassaPaymentResponse;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.UUID;
