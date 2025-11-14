@@ -4,10 +4,13 @@ package com.globallogix.kafka;
 import com.globallogix.client.UserClient;
 import com.globallogix.kafka.events.DeliveryEventDto;
 import com.globallogix.kafka.events.PaymentEventDto;
+import com.globallogix.service.EmailCacheService;
 import com.globallogix.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
@@ -17,19 +20,20 @@ import org.springframework.stereotype.Service;
 @Service
 public class NotificationKafkaListener {
     private final EmailService emailService;
-    private final UserClient userClient;
+    private final EmailCacheService emailCacheService;
 
     @KafkaListener(topics = "delivery.created")
     public void handleDeliveryCreated(ConsumerRecord<String, DeliveryEventDto> record) {
         DeliveryEventDto event = record.value();
         try {
-            log.info("Delivery {} created by sender {}",
+            log.info("NOTIFICATIONS-KAFKA-LISTENER: Delivery {} created by sender {}",
                     event.getDeliveryId(), event.getSenderId());
 
-            String senderEmail = userClient.getUserEmail(record.value().getSenderId());
+            String senderEmail = emailCacheService.getEmail(record.value().getSenderId());
 
 
             emailService.sendDeliveryCreated(event, senderEmail);
+
         } catch (Exception e) {
             log.error("Error processing delivery created: {}", event, e);
         }
@@ -39,9 +43,10 @@ public class NotificationKafkaListener {
     public void handleDeliveryAssigned(ConsumerRecord<String, DeliveryEventDto> record) {
         DeliveryEventDto event = record.value();
         try {
-            log.info("Delivery {} assigned to courier {}", event.getDeliveryId(), event.getSenderId());
+            log.info("NOTIFICATIONS-KAFKA-LISTENER: Delivery {} assigned to courier {}", event.getDeliveryId(), event.getSenderId());
 
-            String senderEmail = userClient.getUserEmail(record.value().getSenderId());
+            String senderEmail = emailCacheService.getEmail(record.value().getSenderId());
+
             emailService.sendDeliveryAssigned(event, senderEmail);
 
         } catch (Exception e) {
@@ -53,10 +58,10 @@ public class NotificationKafkaListener {
     public void handleHandoverConfirmed(ConsumerRecord<String, DeliveryEventDto> record) {
         DeliveryEventDto event = record.value();
         try {
-            log.info("Delivery {} handover confirmed", event.getDeliveryId());
+            log.info("NOTIFICATIONS-KAFKA-LISTENER: Delivery {} handover confirmed", event.getDeliveryId());
 
-            String senderEmail = userClient.getUserEmail(record.value().getSenderId());
-            String courierEmail = userClient.getUserEmail(record.value().getCourierId());
+            String senderEmail = emailCacheService.getEmail(record.value().getSenderId());
+            String courierEmail = emailCacheService.getEmail(record.value().getCourierId());
 
             emailService.sendHandoverConfirmedToSender(event, senderEmail);
             emailService.sendHandoverConfirmedToCourier(event, courierEmail);
@@ -70,10 +75,10 @@ public class NotificationKafkaListener {
     public void handleDeliveryCompleted(ConsumerRecord<String, DeliveryEventDto> record) {
         DeliveryEventDto event = record.value();
         try {
-            log.info("Delivery {} completed", event.getDeliveryId());
+            log.info("NOTIFICATIONS-KAFKA-LISTENER: Delivery {} completed", event.getDeliveryId());
 
-            String senderEmail = userClient.getUserEmail(record.value().getSenderId());
-            String courierEmail = userClient.getUserEmail(record.value().getCourierId());
+            String senderEmail = emailCacheService.getEmail(record.value().getSenderId());
+            String courierEmail = emailCacheService.getEmail(record.value().getCourierId());
 
             emailService.sendDeliveryCompletedToSender(event, senderEmail);
             emailService.sendDeliveryCompletedToCourier(event, courierEmail);
@@ -87,13 +92,13 @@ public class NotificationKafkaListener {
     public void handleDeliveryCancelled(ConsumerRecord<String, DeliveryEventDto> record) {
         DeliveryEventDto event = record.value();
         try {
-            log.info("Delivery {} cancelled", event.getDeliveryId());
+            log.info("NOTIFICATIONS-KAFKA-LISTENER: Delivery {} cancelled", event.getDeliveryId());
 
-            String senderEmail = userClient.getUserEmail(record.value().getSenderId());
+            String senderEmail = emailCacheService.getEmail(record.value().getSenderId());
             emailService.sendDeliveryCancelled(event, senderEmail);
 
             if (event.getCourierId() != null) {
-                String courierEmail = userClient.getUserEmail(record.value().getCourierId());
+                String courierEmail = emailCacheService.getEmail(record.value().getCourierId());
                 emailService.sendDeliveryCancelledToCourier(event, courierEmail);
             }
 
@@ -106,9 +111,9 @@ public class NotificationKafkaListener {
     public void sendCourierForMatchedDelivery(ConsumerRecord<String, DeliveryEventDto> record){
         DeliveryEventDto event = record.value();
         try {
-            log.info("New delivery for courier: {}", event.getCourierId());
+            log.info("NOTIFICATIONS-KAFKA-LISTENER: New delivery for courier: {}", event.getCourierId());
 
-            String courierEmail = userClient.getUserEmail(record.value().getCourierId());
+            String courierEmail = emailCacheService.getEmail(record.value().getCourierId());
             emailService.sendMatchedDelivery(event, courierEmail);
 
 
@@ -128,7 +133,7 @@ public class NotificationKafkaListener {
         try {
             log.info("Sending confirmation url to sender: {}", event.getUserId());
 
-            String senderEmail = userClient.getUserEmail(record.value().getUserId());
+            String senderEmail = emailCacheService.getEmail(record.value().getUserId());
             emailService.sendPaymentUrl(event, senderEmail);
 
 
@@ -136,5 +141,8 @@ public class NotificationKafkaListener {
             log.error("Error processing courier notification: {}", event, e);
         }
     }
+
+
+
 
 }

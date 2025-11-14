@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 @Slf4j
 @RequiredArgsConstructor
 public class EmailService {
-    private final JavaMailSender javaMailSender;
+    //private final JavaMailSender javaMailSender;
 
 //    @Value("${spring.mail.password}")
 //    private String from;
