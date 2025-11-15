@@ -98,6 +98,7 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SPRING_REDIS_HOST: redis-cache
       SPRING_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_TIMEOUT: 5000ms
       SERVER_PORT: 8080
     depends_on:
       - postgres

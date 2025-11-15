@@ -11,13 +11,9 @@ target/
 *.iws
 *.iml
 *.ipr
-# Конфигурационные файлы приложения
-application.properties
-application.yml
-application.yaml
 
-# Или используя шаблон
-# application.*
+
+
 
 # Другие типичные файлы для игнорирования
 *.log
@@ -32,8 +28,6 @@ target/
 .settings
 .springBeans
 .sts4-cache
-**/application.properties
-**/application.yml
 
 ### NetBeans ###
 /nbproject/private/
@@ -44,10 +38,8 @@ target/
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
-application.*
 ### VS Code ###
 .vscode/
 
 ### Mac OS ###
-.DS_Store**/application.properties
-**/application.yml
+.DS_Store
