@@ -15,14 +15,12 @@ spring:
           uri: http://delivery-service:8080
           predicates:
             - Path=/api/deliveries/
-          filters:
-            - name: JwtAuthenticationFilter
+
         - id: flight-service
           uri: http://flight-service:8080
           predicates:
-            -Path=/api/couriers/**
-          filters:
-            - name: JwtAuthenticationFilter
+            - Path=/api/couriers/**
+
   redis:
     host: redis-cache
     port: 6379
