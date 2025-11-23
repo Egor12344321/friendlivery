@@ -1,4 +1,4 @@
-name: CI/CD 
+name: CI/CD
 
 on:
   push:
@@ -41,7 +41,7 @@ jobs:
           
           for service in "${services[@]}"; do
             docker build \
-              -t ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-$service:latest \
+              -t ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/friendlivery-$service:latest \
               -f $service-service/Dockerfile ./$service-service
           done
 
