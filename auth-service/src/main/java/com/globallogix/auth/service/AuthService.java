@@ -48,7 +48,7 @@ public class AuthService {
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .enabled(true)
-                .roles(Set.of(UserRoles.USER))
+                .roles(Set.of(UserRoles.USER))  
                 .build();
         User savedUser = userRepository.save(user);
 

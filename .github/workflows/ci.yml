@@ -1,8 +1,12 @@
-name: CI/CD
+name: CI/CD 
 
 on:
   push:
     branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}/friendlivery
 
 jobs:
   build-and-deploy:
@@ -12,73 +16,80 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Java 21
+      - name: Setup Java 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Build services with Maven
-        run: |
-          mvn clean package -DskipTests
-          find . -name "*.jar" | head -10
-
-      - name: Set up Docker
-        uses: docker/setup-buildx-action@v3
-
-      - name: Install docker-compose
+      - name: Install Docker Compose
         run: |
           sudo apt-get update
-          sudo apt-get install -y docker-compose
+          sudo apt-get install -y docker-compose-v2
+          docker compose version
 
-      - name: Build auth-service
-        run: docker build -t friendlivery-auth:latest -f auth-service/Dockerfile ./auth-service
+      - name: Run tests
+        run: mvn clean test
 
-      - name: Build delivery-service
-        run: docker build -t friendlivery-delivery:latest -f delivery-service/Dockerfile ./delivery-service
+      - name: Build JAR packages
+        run: mvn clean package -DskipTests
 
-      - name: Build payment-service
-        run: docker build -t friendlivery-payment:latest -f payment-service/Dockerfile ./payment-service
-
-      - name: Build flight-service
-        run: docker build -t friendlivery-flight:latest -f flight-service/Dockerfile ./flight-service
-
-      - name: Build notifications-service
-        run: docker build -t friendlivery-notifications:latest -f notifications-service/Dockerfile ./notifications-service
-
-      - name: Build chat-service
-        run: docker build -t friendlivery-chat:latest -f chat-service/Dockerfile ./chat-service
-
-      - name: Build gateway-service
-        run: docker build -t friendlivery-gateway:latest -f api-gateway/Dockerfile ./api-gateway
-
-      - name: Deploy and test
+      - name: Build Docker images
         run: |
-          docker-compose up -d
-          sleep 250
-          
-          services=("auth-service" "delivery-service" "payment-service" "flight-service" "notifications-service" "chat-service")
+          services=("auth" "delivery" "payment" "flight" "notification" "chat" "gateway")
           
           for service in "${services[@]}"; do
-            if [ -z "$(docker ps -q -f name=$service)" ]; then
-              echo "Error: $service container is not running"
-              docker-compose logs $service
-              docker-compose down
-              exit 1
-            fi
+            docker build \
+              -t ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-$service:latest \
+              -f $service-service/Dockerfile ./$service-service
           done
+
+      - name: Start services with health checks
+        run: |
+          docker compose up -d
           
+          wait_for_service() {
+            local service=$1
+            local port=$2
+            local timeout=60
+            local counter=0
           
-          if curl -s http://localhost:8081 > /dev/null; then
-            echo "Auth service is working"
-          else
-            echo "Auth service not responding"
+            while [ $counter -lt $timeout ]; do
+              if curl -s -f "http://localhost:$port/actuator/health" > /dev/null; then
+                return 0
+              fi
+          
+              sleep 5
+              counter=$((counter + 1))
+            done
+          
+            return 1
+          }
+          
+          wait_for_service "gateway" 8080 || true
+          wait_for_service "auth" 8081 || true
+          wait_for_service "delivery" 8082 || true
+
+      - name: Run integration tests
+        run: |
+          RUNNING_CONTAINERS=$(docker compose ps --services --filter "status=running" | wc -l)
+          echo "Running containers: $RUNNING_CONTAINERS"
+          
+          if [ "$RUNNING_CONTAINERS" -lt 5 ]; then
+            echo "Not all containers are running: $RUNNING_CONTAINERS"
+            docker compose ps
             exit 1
           fi
-          
-          echo "All services are running successfully"
+
+      - name: Debug on failure
+        if: failure()
+        run: |
+          docker compose ps
+          docker compose logs --tail=50
 
       - name: Cleanup
         if: always()
-        run: docker-compose down
+        run: |
+          docker compose down -v
+          docker system prune -f
