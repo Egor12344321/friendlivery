@@ -10,9 +10,8 @@ spring:
         - id: auth-service
           uri: http://auth-service:8080
           predicates:
-            - Path=/api/auth/**
-            - Path=/api/admin/**
-            - Path=/api/kyc/**
+            - Path=/api/auth/**, /api/admin/**, /api/kyc/**
+
         - id: delivery-service
           uri: http://delivery-service:8080
           predicates:
@@ -21,8 +20,8 @@ spring:
         - id: flight-service
           uri: http://flight-service:8080
           predicates:
-            - Path=/api/couriers/**
-            - Path=/api/matching/**
+            - Path=/api/couriers/**, /api/matching/**
+
 
   redis:
     host: redis-cache
@@ -39,7 +38,6 @@ jwt:
   refresh:
     expiration:
       604800000
-
 management:
   endpoints:
     web:
