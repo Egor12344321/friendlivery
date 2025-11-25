@@ -11,6 +11,8 @@ spring:
           uri: http://auth-service:8080
           predicates:
             - Path=/api/auth/**
+            - Path=/api/admin/**
+            - Path=/api/kyc/**
         - id: delivery-service
           uri: http://delivery-service:8080
           predicates:
@@ -20,6 +22,7 @@ spring:
           uri: http://flight-service:8080
           predicates:
             - Path=/api/couriers/**
+            - Path=/api/matching/**
 
   redis:
     host: redis-cache
