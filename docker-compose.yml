@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   postgres:
@@ -183,3 +182,4 @@ volumes:
 networks:
   global-logix-network:
     driver: bridge
+    name: friendlivery-dev-network

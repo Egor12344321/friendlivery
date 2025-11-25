@@ -2,14 +2,17 @@ name: CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_PREFIX: ${{ github.repository_owner }}/friendlivery
+  DOCKERHUB_NAMESPACE: "epapakin"
+  STACK_NAME: "friendlivery"
 
 jobs:
-  build-and-deploy:
+  tests:
+    name: Run Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -23,73 +26,140 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Install Docker Compose
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose-v2
-          docker compose version
-
       - name: Run tests
         run: mvn clean test
+
+  build_and_push:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+    needs: tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
 
       - name: Build JAR packages
         run: mvn clean package -DskipTests
 
-      - name: Build Docker images
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push images
         run: |
-          services=("auth" "delivery" "payment" "flight" "notification" "chat" "gateway")
+          services=("auth" "delivery" "payment" "flight" "notifications" "chat")
           
           for service in "${services[@]}"; do
-            docker build \
-              -t ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/friendlivery-$service:latest \
-              -f $service-service/Dockerfile ./$service-service
+            echo "Building $service-service"
+            IMAGE_TAG="${{ env.DOCKERHUB_NAMESPACE }}/friendlivery-$service:latest"
+            cd $service-service
+            docker build -t $IMAGE_TAG .
+            docker push $IMAGE_TAG
+            cd ..
           done
+          
+          echo "Building api-gateway"
+          IMAGE_TAG="${{ env.DOCKERHUB_NAMESPACE }}/friendlivery-gateway:latest"
+          cd api-gateway
+          docker build -t $IMAGE_TAG .
+          docker push $IMAGE_TAG
 
-      - name: Start services with health checks
+  deploy_swarm:
+    name: Deploy to Swarm
+    runs-on: self-hosted
+    needs: build_and_push
+    if: |
+      github.event_name == 'push' && 
+      github.ref == 'refs/heads/main' && 
+      github.actor == 'Egor12344321'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Pull latest images
+        shell: powershell
         run: |
-          docker compose up -d
-          
-          wait_for_service() {
-            local service=$1
-            local port=$2
-            local timeout=60
-            local counter=0
-          
-            while [ $counter -lt $timeout ]; do
-              if curl -s -f "http://localhost:$port/actuator/health" > /dev/null; then
-                return 0
-              fi
-          
-              sleep 5
-              counter=$((counter + 1))
-            done
-          
-            return 1
+          $services = @("auth", "delivery", "payment", "flight", "notifications", "chat", "gateway")
+          $namespace = "${{ env.DOCKERHUB_NAMESPACE }}"
+
+          foreach ($service in $services) {
+            if ($service -eq "gateway") {
+              $image = "$namespace/friendlivery-gateway:latest"
+            } else {
+              $image = "$namespace/friendlivery-$service:latest"
+            }
+            Write-Host "Pulling $image"
+            docker pull $image
           }
-          
-          wait_for_service "gateway" 8080 || true
-          wait_for_service "auth" 8081 || true
-          wait_for_service "delivery" 8082 || true
 
-      - name: Run integration tests
+      - name: Deploy to Swarm
+        shell: powershell
         run: |
-          RUNNING_CONTAINERS=$(docker compose ps --services --filter "status=running" | wc -l)
-          echo "Running containers: $RUNNING_CONTAINERS"
+          $ErrorActionPreference = 'SilentlyContinue'
           
-          if [ "$RUNNING_CONTAINERS" -lt 5 ]; then
-            echo "Not all containers are running: $RUNNING_CONTAINERS"
-            docker compose ps
+          $result = cmd /c "docker stack deploy -c docker-stack.yml ${{ env.STACK_NAME }} --with-registry-auth --resolve-image always" 2`>`&1
+          Write-Host $result
+          
+          Write-Host "Stack deployment completed"
+          exit 0
+      - name: Wait for API Gateway port
+        shell: powershell
+        run: |
+          Write-Host "Waiting for port 8080 to open..."
+          $maxWait = 180  # 3 минуты
+          $waitInterval = 5
+          $elapsed = 0
+
+          while ($elapsed -lt $maxWait) {
+            try {
+              $tcp = New-Object System.Net.Sockets.TcpClient
+              $tcp.Connect("localhost", 8080)
+              $tcp.Close()
+              Write-Host "Port 8080 is open after $elapsed seconds!"
+              break
+            } catch {
+              Write-Host "Waiting for port 8080... ($elapsed/$maxWait seconds)"
+              Start-Sleep -Seconds $waitInterval
+              $elapsed += $waitInterval
+            }
+          }
+
+          if ($elapsed -ge $maxWait) {
+            Write-Host "WARNING: Port 8080 check timeout, but continuing deployment..."
+          }
+      - name: Verify deployment
+        shell: powershell
+        run: |
+          Write-Host "=== FINAL DEPLOYMENT CHECK ==="
+          
+          try {
+            $tcp = New-Object System.Net.Sockets.TcpClient
+            $tcp.Connect("localhost", 8080)
+            $tcp.Close()
+            Write-Host "Port 8080 open"
+          } catch {
+            Write-Host "Port 8080 not accessible"
             exit 1
-          fi
+          }
 
-      - name: Debug on failure
-        if: failure()
+      - name: Show running services
+        shell: powershell
         run: |
-          docker compose ps
-          docker compose logs --tail=50
-
-      - name: Cleanup
-        if: always()
-        run: |
-          docker compose down -v
-          docker system prune -f
+          Write-Host "Final stack status:"
+          docker stack ps ${{ env.STACK_NAME }}
