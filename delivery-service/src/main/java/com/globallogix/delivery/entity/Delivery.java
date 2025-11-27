@@ -21,32 +21,43 @@ public class Delivery {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(name = "trackingNumber")
     String trackingNumber;
 
-    @Column
+    @Column(name = "senderId")
     Long senderId;
 
-    @Column
+    @Column(name = "courierId")
     Long courierId;
 
-
-    @Column(nullable = false)
+    @Column(name = "fromAirport", nullable = false)
     private String fromAirport;
-
+    @Column(name = "toAirport", nullable = false)
     private String toAirport;
+    @Column(name = "desiredDate", nullable = false)
     private LocalDate desiredDate;
+    @Column(name = "deliveryDeadline", nullable = false)
     private LocalDate deliveryDeadline;
 
+    @Column(name = "description")
     private String description;
+    @Column(name = "weight", nullable = false)
     private Double weight;
+    @Column(name = "courierAcceptedAt")
     private LocalDateTime courierAcceptedAt;
+    @Column(name = "senderAcceptedAt")
     private LocalDateTime senderAcceptedAt;
+    @Column(name = "status")
     private DeliveryStatus status;
+    @Column(name = "createdAt")
     private LocalDateTime createdAt;
+    @Column(name = "updatedAt")
     private LocalDateTime updatedAt;
 
+    @Column(name = "price")
     private BigDecimal price;
+
+    @Column(name = "dimensions")
     private String dimensions;
 
     @PrePersist
