@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -55,11 +56,17 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         }
         log.info("Получение userId");
         String userId = String.valueOf(jwtUtil.extractUserId(token));
-
+        log.info("Получение статуса VerificationStatus for user: {}", userId);
+        String verificationStatus = String.valueOf(jwtUtil.extractUserVerificationStatus(token));
+        log.info("Получение ролей for user: {}", userId);
+        List<String> roles  = jwtUtil.extractUserRoles(token);
+        String rolesHeader = roles != null ? String.join(",", roles) : "";
         log.info("Valid token ID: {}", userId);
 
         var modRequest = exchange.getRequest().mutate()
                 .header("X-User-Id", userId)
+                .header("X-User-Verification-Status", verificationStatus)
+                .header("X-User-Roles", rolesHeader)
                 .build();
 
         log.info("Headers added, forwarding to service");

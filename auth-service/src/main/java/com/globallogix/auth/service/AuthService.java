@@ -4,7 +4,7 @@ import com.globallogix.auth.dto.request.AuthRequest;
 import com.globallogix.auth.dto.response.AuthResponse;
 import com.globallogix.auth.dto.request.RegisterRequest;
 import com.globallogix.auth.entity.User;
-import com.globallogix.auth.entity.UserRoles;
+import com.globallogix.auth.entity.enums.UserRoles;
 import com.globallogix.auth.exception.InvalidCredentialsException;
 import com.globallogix.auth.repository.UserRepository;
 import com.globallogix.auth.security.JwtUtil;

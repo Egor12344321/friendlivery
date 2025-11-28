@@ -2,7 +2,7 @@ package com.globallogix.auth.service;
 
 
 import com.globallogix.auth.entity.User;
-import com.globallogix.auth.entity.VerificationStatus;
+import com.globallogix.auth.entity.enums.VerificationStatus;
 import com.globallogix.auth.exception.UserNotFoundException;
 import com.globallogix.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

@@ -20,7 +20,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if (!user.isEnabled()){
             throw new UsernameNotFoundException("Пользователь не активен: " + username);
         }
-
         return user;
     }
 }

@@ -1,17 +1,16 @@
 package com.globallogix.auth.controller;
 
 
-import com.globallogix.auth.entity.VerificationStatus;
+import com.globallogix.auth.dto.request.DocumentVerificationRequest;
+import com.globallogix.auth.entity.enums.VerificationStatus;
 import com.globallogix.auth.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -24,13 +23,12 @@ public class KycController {
 
     @PostMapping("/documents/upload")
     public ResponseEntity<String> uploadPassport(
-            @RequestParam("passportFront") MultipartFile passportFront,
-            @RequestParam("passportBack") MultipartFile passportBack,
-            @RequestParam("selfie") MultipartFile selfieWithPassport
-    ) {
+            @Valid @RequestBody DocumentVerificationRequest request
+            ) {
         //отправка доков
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
+
         userService.updateVerificationStatus(VerificationStatus.IN_PROCESS, username);
         return ResponseEntity.ok("Data sent successfully");
     }

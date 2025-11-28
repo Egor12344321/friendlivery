@@ -9,9 +9,10 @@ import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
+
 
 import javax.crypto.SecretKey;
+import java.util.List;
 
 @Component
 @Slf4j
@@ -52,6 +53,30 @@ public class JwtUtil {
 
         return userIdObj;
     }
+
+    public String extractUserVerificationStatus(String token) {
+
+        Claims claims = extractAllClaims(token);
+        String verificationStatus = claims.get("verificationStatus").toString();
+        log.info("VerificationStatus from token - type: {}, value: {}",
+                verificationStatus != null ? verificationStatus.getClass().getSimpleName() : "null",
+                verificationStatus);
+
+        return verificationStatus;
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<String> extractUserRoles(String token) {
+
+        Claims claims = extractAllClaims(token);
+        List<String> roles = (List<String>) claims.get("roles");
+        log.info("UserRoles from token - type: {}, value: {}",
+                roles != null ? roles.getClass().getSimpleName() : "null",
+                roles);
+
+        return roles;
+    }
+
     public Boolean validateToken(String token){
         try{
             extractAllClaims(token);

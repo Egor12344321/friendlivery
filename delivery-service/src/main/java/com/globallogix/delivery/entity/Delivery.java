@@ -48,6 +48,7 @@ public class Delivery {
     @Column(name = "senderAcceptedAt")
     private LocalDateTime senderAcceptedAt;
     @Column(name = "status")
+    @Enumerated(EnumType.STRING)
     private DeliveryStatus status;
     @Column(name = "createdAt")
     private LocalDateTime createdAt;

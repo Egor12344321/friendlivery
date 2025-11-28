@@ -1,4 +1,4 @@
-package com.globallogix.auth.entity;
+package com.globallogix.auth.entity.enums;
 
 public enum UserRoles {
     USER,
