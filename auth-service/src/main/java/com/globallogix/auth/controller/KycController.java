@@ -2,7 +2,7 @@ package com.globallogix.auth.controller;
 
 
 import com.globallogix.auth.dto.request.DocumentVerificationRequest;
-import com.globallogix.auth.entity.enums.VerificationStatus;
+import com.globallogix.auth.entity.enums.VerificationDocumentsStatus;
 import com.globallogix.auth.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 
 @RestController
@@ -29,7 +28,7 @@ public class KycController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
 
-        userService.updateVerificationStatus(VerificationStatus.IN_PROCESS, username);
+        userService.updateVerificationStatus(VerificationDocumentsStatus.IN_PROCESS, username);
         return ResponseEntity.ok("Data sent successfully");
     }
 

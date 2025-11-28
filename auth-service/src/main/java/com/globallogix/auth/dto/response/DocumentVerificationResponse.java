@@ -1,5 +1,7 @@
 package com.globallogix.auth.dto.response;
 
+import com.globallogix.auth.entity.UserDocuments;
+
 import java.time.LocalDateTime;
 
 public record DocumentVerificationResponse(
@@ -8,4 +10,13 @@ public record DocumentVerificationResponse(
          String status,
          LocalDateTime submittedAt
 ) {
+    public static DocumentVerificationResponse mapFromEntityToResponseSuccess(UserDocuments document){
+        return new DocumentVerificationResponse(
+                true,
+                "Документы успешно загружены",
+                document.getDocumentsVerificationStatus().name(),
+                document.getSubmittedAt()
+        );
+    }
+
 }

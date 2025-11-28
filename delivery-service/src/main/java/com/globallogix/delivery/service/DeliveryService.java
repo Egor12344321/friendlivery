@@ -27,7 +27,7 @@ public class DeliveryService {
     private final DeliveryRepository deliveryRepository;
     private final DeliveryKafkaProducer deliveryKafkaProducer;
 
-    public ResponseEntity<?> createDelivery(DeliveryRequest request, Long senderId){
+    public DeliveryResponse createDelivery(DeliveryRequest request, Long senderId){
 
 
 

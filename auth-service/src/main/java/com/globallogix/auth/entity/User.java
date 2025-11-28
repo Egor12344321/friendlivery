@@ -2,7 +2,7 @@ package com.globallogix.auth.entity;
 
 
 import com.globallogix.auth.entity.enums.UserRoles;
-import com.globallogix.auth.entity.enums.VerificationStatus;
+import com.globallogix.auth.entity.enums.VerificationDocumentsStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -46,7 +46,7 @@ public class User implements UserDetails {
     @Builder.Default
     private boolean enabled = true;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @Builder.Default
     private List<UserDocuments> documents = new ArrayList<>();
 
@@ -61,7 +61,7 @@ public class User implements UserDetails {
     private Double rating = 5.0;
 
     @Enumerated(EnumType.STRING)
-    private VerificationStatus verificationStatus = VerificationStatus.NOT_VERIFIED;
+    private VerificationDocumentsStatus verificationStatus = VerificationDocumentsStatus.NOT_VERIFIED;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -73,7 +73,7 @@ public class User implements UserDetails {
         boolean enabled = true;
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
-        verificationStatus = VerificationStatus.NOT_VERIFIED;
+        verificationStatus = VerificationDocumentsStatus.NOT_VERIFIED;
         if (this.roles.isEmpty()) {
             this.roles.add(UserRoles.USER);
         }

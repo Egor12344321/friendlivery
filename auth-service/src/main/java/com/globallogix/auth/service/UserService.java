@@ -3,7 +3,7 @@ package com.globallogix.auth.service;
 
 import com.globallogix.auth.entity.User;
 import com.globallogix.auth.entity.enums.UserRoles;
-import com.globallogix.auth.entity.enums.VerificationStatus;
+import com.globallogix.auth.entity.enums.VerificationDocumentsStatus;
 import com.globallogix.auth.exception.UserNotFoundException;
 import com.globallogix.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ public class UserService {
     private final UserRepository userRepository;
 
 
-    public void updateVerificationStatus(VerificationStatus status, String username){
+    public void updateVerificationStatus(VerificationDocumentsStatus status, String username){
         log.debug("Started updating verification status");
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("User with this username not found"));

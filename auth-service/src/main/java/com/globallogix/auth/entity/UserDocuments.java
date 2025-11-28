@@ -1,9 +1,12 @@
 package com.globallogix.auth.entity;
 
 
+import com.globallogix.auth.entity.enums.DocumentsVerificationStatus;
 import com.globallogix.auth.entity.enums.PhotoType;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -17,7 +20,7 @@ public class UserDocuments {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
@@ -27,4 +30,17 @@ public class UserDocuments {
 
     @Column(name = "link_to_photo")
     private String linkToPhoto;
+
+    @Column(name = "documents_verification_status")
+    @Enumerated(EnumType.STRING)
+    private DocumentsVerificationStatus documentsVerificationStatus;
+
+    @Column(name = "submitted_at")
+    private LocalDateTime submittedAt;
+
+
+    @PrePersist
+    public void onCreate(){
+        this.submittedAt = LocalDateTime.now();
+    }
 }

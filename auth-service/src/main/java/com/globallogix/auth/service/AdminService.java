@@ -2,7 +2,7 @@ package com.globallogix.auth.service;
 
 
 import com.globallogix.auth.entity.User;
-import com.globallogix.auth.entity.enums.VerificationStatus;
+import com.globallogix.auth.entity.enums.VerificationDocumentsStatus;
 import com.globallogix.auth.exception.UserNotFoundException;
 import com.globallogix.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,14 +18,14 @@ public class AdminService {
     public void approveVerification(Long userId){
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь с таким id: " + userId + " - не найден"));
-        user.setVerificationStatus(VerificationStatus.VERIFIED);
+        user.setVerificationStatus(VerificationDocumentsStatus.VERIFIED);
         userRepository.save(user);
     }
 
     public void cancelVerification(Long userId){
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь с таким id: " + userId + " - не найден"));
-        user.setVerificationStatus(VerificationStatus.CANCELLED);
+        user.setVerificationStatus(VerificationDocumentsStatus.CANCELLED);
         userRepository.save(user);
     }
 }

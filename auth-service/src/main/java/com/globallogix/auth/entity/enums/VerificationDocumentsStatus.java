@@ -1,6 +1,6 @@
 package com.globallogix.auth.entity.enums;
 
-public enum VerificationStatus {
+public enum VerificationDocumentsStatus {
     NOT_VERIFIED,
     IN_PROCESS,
     VERIFIED,
