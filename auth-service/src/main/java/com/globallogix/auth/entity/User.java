@@ -1,6 +1,7 @@
 package com.globallogix.auth.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.globallogix.auth.entity.enums.UserRoles;
 import com.globallogix.auth.entity.enums.VerificationDocumentsStatus;
 import jakarta.persistence.*;
@@ -47,8 +48,8 @@ public class User implements UserDetails {
     private boolean enabled = true;
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @Builder.Default
-    private List<UserDocuments> documents = new ArrayList<>();
+    @JsonIgnore
+    private UserDocuments documents;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)

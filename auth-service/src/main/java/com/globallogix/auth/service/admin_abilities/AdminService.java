@@ -1,4 +1,4 @@
-package com.globallogix.auth.service;
+package com.globallogix.auth.service.admin_abilities;
 
 
 import com.globallogix.auth.entity.User;

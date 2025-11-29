@@ -1,7 +1,7 @@
 package com.globallogix.auth.security;
 
 
-import com.globallogix.auth.service.UserDetailsServiceImpl;
+import com.globallogix.auth.service.security.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

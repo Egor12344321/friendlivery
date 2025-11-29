@@ -1,7 +1,7 @@
 package com.globallogix.auth.controller;
 
 
-import com.globallogix.auth.service.AdminService;
+import com.globallogix.auth.service.admin_abilities.AdminService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;

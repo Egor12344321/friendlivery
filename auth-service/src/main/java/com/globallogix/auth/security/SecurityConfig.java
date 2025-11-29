@@ -1,7 +1,7 @@
 package com.globallogix.auth.security;
 
 
-import com.globallogix.auth.service.UserDetailsServiceImpl;
+import com.globallogix.auth.service.security.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

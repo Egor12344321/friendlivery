@@ -1,13 +1,15 @@
-package com.globallogix.auth.service;
+package com.globallogix.auth.service.authorization;
 
 import com.globallogix.auth.dto.request.AuthRequest;
 import com.globallogix.auth.dto.response.AuthResponse;
 import com.globallogix.auth.dto.request.RegisterRequest;
 import com.globallogix.auth.entity.User;
 import com.globallogix.auth.entity.enums.UserRoles;
+import com.globallogix.auth.exception.EmailNotUniqueException;
 import com.globallogix.auth.exception.InvalidCredentialsException;
 import com.globallogix.auth.repository.UserRepository;
 import com.globallogix.auth.security.JwtUtil;
+import com.globallogix.auth.service.refresh.RedisServiceCrud;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,18 +29,18 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
-    private final RefreshRedisService refreshRedisService;
+    private final RedisServiceCrud redisServiceCrud;
 
 
     public AuthResponse register(RegisterRequest request){
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()){
             log.info("Ошибка регистрации из-за не идентичного мейла: {}", request.getEmail());
-            throw new RuntimeException("Пользователь с таким email уже существует");
+            throw new EmailNotUniqueException("Пользователь с таким email уже существует");
         }
         if (userRepository.findByUsername(request.getUsername()).isPresent()){
             log.info("Ошибка регистрации из-за не идентичности username: {}", request.getUsername());
-            throw new RuntimeException("Пользователь с таким username существует");
+            throw new EmailNotUniqueException("Пользователь с таким username существует");
         }
         User user = User.builder()
                 .email(request.getEmail())
@@ -61,7 +63,7 @@ public class AuthService {
         log.info("RefreshToken generated successfully");
 
 
-        refreshRedisService.saveRefreshToCache(refreshToken, user.getUsername());
+        redisServiceCrud.saveRefreshToCache(refreshToken, user.getUsername());
         log.info("Refresh token saved in cache successfully");
 
 
@@ -91,7 +93,7 @@ public class AuthService {
             log.info("Access token generated successfully");
             String refreshToken = jwtUtil.generateRefreshToken(user);
             log.info("Refresh token generated successfully");
-            refreshRedisService.saveRefreshToCache(refreshToken, user.getUsername());
+            redisServiceCrud.saveRefreshToCache(refreshToken, user.getUsername());
             log.info("Refresh token saved to cache");
 
             return AuthResponse.builder()
@@ -109,7 +111,7 @@ public class AuthService {
 
     public void logout(String token){
         String username = jwtUtil.extractUsername(token);
-        refreshRedisService.deleteTokenFromCache(username);
+        redisServiceCrud.deleteTokenFromCache(username);
     }
 
 }

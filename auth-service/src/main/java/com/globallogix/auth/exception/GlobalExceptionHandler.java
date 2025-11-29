@@ -32,8 +32,23 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleRunTimeException(RuntimeException e){
         log.error("Handle runtime exception");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body("?? Введенные данные уже зарегистрирваны в системе");
+                .body(e.getMessage());
     }
+
+    @ExceptionHandler({EmailNotUniqueException.class})
+    public ResponseEntity<?> handleEmailNotUniqueException(EmailNotUniqueException e){
+          log.error("Handle email not unique exception");
+          return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                  .body(e.getMessage());
+    }
+
+    @ExceptionHandler({UsernameNotUniqueException.class})
+    public ResponseEntity<?> handleEmailNotUniqueException(UsernameNotUniqueException e){
+        log.error("Handle username not unique exception");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(e.getMessage());
+    }
+
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<AuthResponse> handleUserNotFoundException(UserNotFoundException e){
         ResponseCookie deleteCookie = ResponseCookie.from("refresh", "")

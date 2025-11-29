@@ -2,8 +2,10 @@ package com.globallogix.auth.controller;
 
 
 import com.globallogix.auth.dto.request.DocumentVerificationRequest;
+import com.globallogix.auth.dto.response.DocumentVerificationResponse;
 import com.globallogix.auth.entity.enums.VerificationDocumentsStatus;
-import com.globallogix.auth.service.UserService;
+import com.globallogix.auth.service.kyc.DocumentsService;
+import com.globallogix.auth.service.kyc.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,17 +21,18 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/kyc")
 public class KycController {
     private final UserService userService;
+    private final DocumentsService documentsService;
 
     @PostMapping("/documents/upload")
-    public ResponseEntity<String> uploadPassport(
+    public ResponseEntity<DocumentVerificationResponse> uploadPassport(
             @Valid @RequestBody DocumentVerificationRequest request
             ) {
-        //отправка доков
+        log.info("KYC-CONTROLLER: Started documents uploading - getting username from context");
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
-
-        userService.updateVerificationStatus(VerificationDocumentsStatus.IN_PROCESS, username);
-        return ResponseEntity.ok("Data sent successfully");
+        log.info("KYC-CONTROLLER: Got username from context: {}; starting uploading to db", username);
+        DocumentVerificationResponse response = documentsService.uploadDocuments(request, username);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/apply/sender")

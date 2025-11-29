@@ -1,4 +1,4 @@
-package com.globallogix.auth.service;
+package com.globallogix.auth.service.refresh;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +11,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class RefreshRedisService {
+public class RedisServiceCrud {
     private final RedisTemplate<String, String> redisTemplate;
     private static final String CACHE_KEY_PREFIX = "refresh:";
 

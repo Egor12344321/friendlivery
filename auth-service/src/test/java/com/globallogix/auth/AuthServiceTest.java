@@ -1,8 +1,8 @@
 package com.globallogix.auth;
 
 
-import com.globallogix.auth.service.AuthService;
-import com.globallogix.auth.service.RefreshRedisService;
+import com.globallogix.auth.service.authorization.AuthService;
+import com.globallogix.auth.service.refresh.RedisServiceCrud;
 import org.junit.jupiter.api.Test;
 
 import com.globallogix.auth.dto.request.AuthRequest;
@@ -43,7 +43,7 @@ class AuthServiceTest {
     private AuthenticationManager authenticationManager;
 
     @Mock
-    private RefreshRedisService refreshRedisService;
+    private RedisServiceCrud redisServiceCrud;
 
     @InjectMocks
     private AuthService authService;
@@ -84,7 +84,7 @@ class AuthServiceTest {
         verify(userRepository).save(any(User.class));
         verify(jwtUtil).generateToken(savedUser);
         verify(jwtUtil).generateRefreshToken(savedUser);
-        verify(refreshRedisService).saveRefreshToCache("refresh-token", "testuser");
+        verify(redisServiceCrud).saveRefreshToCache("refresh-token", "testuser");
     }
 
     @Test
@@ -153,7 +153,7 @@ class AuthServiceTest {
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
         verify(jwtUtil).generateToken(user);
         verify(jwtUtil).generateRefreshToken(user);
-        verify(refreshRedisService).saveRefreshToCache("refresh-token", "testuser");
+        verify(redisServiceCrud).saveRefreshToCache("refresh-token", "testuser");
     }
 
     @Test
@@ -179,11 +179,11 @@ class AuthServiceTest {
         String username = "testuser";
 
         when(jwtUtil.extractUsername(token)).thenReturn(username);
-        doNothing().when(refreshRedisService).deleteTokenFromCache(username);
+        doNothing().when(redisServiceCrud).deleteTokenFromCache(username);
 
         authService.logout(token);
 
         verify(jwtUtil).extractUsername(token);
-        verify(refreshRedisService).deleteTokenFromCache(username);
+        verify(redisServiceCrud).deleteTokenFromCache(username);
     }
 }

@@ -1,8 +1,7 @@
 package com.globallogix.auth.entity;
 
 
-import com.globallogix.auth.entity.enums.DocumentsVerificationStatus;
-import com.globallogix.auth.entity.enums.PhotoType;
+import com.globallogix.auth.entity.enums.VerificationDocumentsStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,16 +23,15 @@ public class UserDocuments {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(name = "photo_type")
-    @Enumerated(EnumType.STRING)
-    private PhotoType photoType;
-
-    @Column(name = "link_to_photo")
+    @Column(name = "link_to_scan")
     private String linkToPhoto;
+
+    @Column(name = "link_to_selfie")
+    private String linkToSelfie;
 
     @Column(name = "documents_verification_status")
     @Enumerated(EnumType.STRING)
-    private DocumentsVerificationStatus documentsVerificationStatus;
+    private VerificationDocumentsStatus documentsVerificationStatus;
 
     @Column(name = "submitted_at")
     private LocalDateTime submittedAt;

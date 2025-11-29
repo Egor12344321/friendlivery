@@ -1,4 +1,4 @@
-package com.globallogix.auth.service;
+package com.globallogix.auth.service.refresh;
 
 
 import com.globallogix.auth.dto.response.AuthResponse;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @RequiredArgsConstructor
 public class RefreshTokenService {
-    private final RefreshRedisService refreshRedisService;
+    private final RedisServiceCrud redisServiceCrud;
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
 
@@ -38,7 +38,7 @@ public class RefreshTokenService {
             if (!jwtUtil.validateToken(refresh)){
                 throw new InvalidTokenRefreshException("Срок действия рефршен токена истек, надо заново регистрироваться");
             }
-            String refreshFromRedis = refreshRedisService.getRefreshTokenFromCache(username)
+            String refreshFromRedis = redisServiceCrud.getRefreshTokenFromCache(username)
                     .orElseThrow(() -> new TokenNotFoundException("Токен не найден"));
             log.info("Токен из кук найден и является валидным для пользователя: {}", username);
             log.info("Токен из кук: {}", refresh);
@@ -50,7 +50,7 @@ public class RefreshTokenService {
                         .orElseThrow(() -> new UserNotFoundException("Пользователь с таким username не найден"));
 
                 String updatedRefresh = jwtUtil.generateRefreshToken(user);
-                refreshRedisService.saveRefreshToCache(updatedRefresh, username);
+                redisServiceCrud.saveRefreshToCache(updatedRefresh, username);
 
                 return UpdateTokens.builder()
                         .accessToken(jwtUtil.generateToken(user))
