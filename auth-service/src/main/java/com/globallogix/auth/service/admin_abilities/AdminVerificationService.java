@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AdminService {
+public class AdminVerificationService {
     private final UserRepository userRepository;
 
     public void approveVerification(Long userId){

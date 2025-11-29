@@ -1,7 +1,7 @@
 package com.globallogix.auth.service.authorization;
 
 import com.globallogix.auth.dto.request.AuthRequest;
-import com.globallogix.auth.dto.response.AuthResponse;
+import com.globallogix.auth.dto.response.authorization.AuthResponse;
 import com.globallogix.auth.dto.request.RegisterRequest;
 import com.globallogix.auth.entity.User;
 import com.globallogix.auth.entity.enums.UserRoles;

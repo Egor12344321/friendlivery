@@ -2,8 +2,7 @@ package com.globallogix.auth.controller;
 
 
 import com.globallogix.auth.dto.request.DocumentVerificationRequest;
-import com.globallogix.auth.dto.response.DocumentVerificationResponse;
-import com.globallogix.auth.entity.enums.VerificationDocumentsStatus;
+import com.globallogix.auth.dto.response.documents.DocumentVerificationResponse;
 import com.globallogix.auth.service.kyc.DocumentsService;
 import com.globallogix.auth.service.kyc.UserService;
 import jakarta.validation.Valid;

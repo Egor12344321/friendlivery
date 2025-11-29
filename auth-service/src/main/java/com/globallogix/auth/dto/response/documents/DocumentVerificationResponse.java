@@ -1,4 +1,4 @@
-package com.globallogix.auth.dto.response;
+package com.globallogix.auth.dto.response.documents;
 
 import com.globallogix.auth.entity.UserDocuments;
 

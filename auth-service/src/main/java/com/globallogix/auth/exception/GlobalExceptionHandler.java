@@ -1,7 +1,7 @@
 package com.globallogix.auth.exception;
 
 
-import com.globallogix.auth.dto.response.AuthResponse;
+import com.globallogix.auth.dto.response.authorization.AuthResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

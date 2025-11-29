@@ -1,4 +1,4 @@
-package com.globallogix.auth.dto.response;
+package com.globallogix.auth.dto.response.authorization;
 
 import lombok.Builder;
 import lombok.Data;

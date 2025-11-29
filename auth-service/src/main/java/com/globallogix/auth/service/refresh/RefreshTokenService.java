@@ -1,8 +1,8 @@
 package com.globallogix.auth.service.refresh;
 
 
-import com.globallogix.auth.dto.response.AuthResponse;
-import com.globallogix.auth.dto.response.UpdateTokens;
+import com.globallogix.auth.dto.response.authorization.AuthResponse;
+import com.globallogix.auth.dto.response.authorization.UpdateTokens;
 import com.globallogix.auth.entity.User;
 import com.globallogix.auth.exception.TokenNotFoundException;
 import com.globallogix.auth.exception.InvalidTokenRefreshException;
