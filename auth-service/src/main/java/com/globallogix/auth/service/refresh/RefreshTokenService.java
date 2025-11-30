@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -21,6 +22,7 @@ public class RefreshTokenService {
     private final RedisServiceCrud redisServiceCrud;
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
+
 
     public ResponseCookie setRefreshTokenToCookie(AuthResponse response){
         ResponseCookie refreshCookie = ResponseCookie.from("refresh", response.getRefreshToken())
@@ -31,6 +33,7 @@ public class RefreshTokenService {
         response.setRefreshToken(null);
         return  refreshCookie;
     }
+
 
     public UpdateTokens updateTokens(String refresh) {
             log.info("SERVICE: Updating tokens");

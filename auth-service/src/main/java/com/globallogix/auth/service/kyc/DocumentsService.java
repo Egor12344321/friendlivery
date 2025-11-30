@@ -12,6 +12,7 @@ import com.globallogix.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +21,8 @@ public class DocumentsService {
     private final UserDocumentRepository userDocumentRepository;
     private final UserRepository userRepository;
 
+
+    @Transactional
     public DocumentVerificationResponse uploadDocuments(DocumentVerificationRequest request, String username){
         log.info("KYC-SERVICE: Starting uploading documents");
         User user = userRepository.findByUsername(username)

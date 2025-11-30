@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.Optional;
@@ -15,10 +16,12 @@ public class RedisServiceCrud {
     private final RedisTemplate<String, String> redisTemplate;
     private static final String CACHE_KEY_PREFIX = "refresh:";
 
+
     public void saveRefreshToCache(String token, String username){
         redisTemplate.opsForValue().set(CACHE_KEY_PREFIX + username, token, Duration.ofDays(7));
         log.info("Refresh token saved to cache successfully");
     }
+
 
     public void deleteTokenFromCache(String username){
         Boolean deleted = redisTemplate.delete(CACHE_KEY_PREFIX + username);

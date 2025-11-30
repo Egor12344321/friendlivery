@@ -18,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
@@ -31,7 +32,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final RedisServiceCrud redisServiceCrud;
 
-
+    @Transactional
     public AuthResponse register(RegisterRequest request){
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()){
@@ -55,7 +56,11 @@ public class AuthService {
         User savedUser = userRepository.save(user);
 
         log.info("Пользователь {} успешно зарегистрирован", savedUser.getId());
+        return createAuthResponse(savedUser);
 
+    }
+
+    public AuthResponse createAuthResponse(User savedUser){
         String jwtToken = jwtUtil.generateToken(savedUser);
         log.info("AccessToken generated successfully");
 
@@ -63,7 +68,7 @@ public class AuthService {
         log.info("RefreshToken generated successfully");
 
 
-        redisServiceCrud.saveRefreshToCache(refreshToken, user.getUsername());
+        redisServiceCrud.saveRefreshToCache(refreshToken, savedUser.getUsername());
         log.info("Refresh token saved in cache successfully");
 
 
@@ -76,7 +81,6 @@ public class AuthService {
                 .message("Пользователь зарегистрирован")
                 .build();
     }
-
 
     public AuthResponse authenticate(AuthRequest request){
         try {
@@ -108,6 +112,7 @@ public class AuthService {
             throw new InvalidCredentialsException("Неправильный логин или пароль");
         }
     }
+
 
     public void logout(String token){
         String username = jwtUtil.extractUsername(token);
