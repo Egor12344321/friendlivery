@@ -14,6 +14,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -27,10 +28,10 @@ public class DeliveryService {
     private final DeliveryRepository deliveryRepository;
     private final DeliveryKafkaProducer deliveryKafkaProducer;
 
+
+
+    @Transactional
     public DeliveryResponse createDelivery(DeliveryRequest request, Long senderId){
-
-
-
         Delivery delivery = Delivery.builder()
                 .fromAirport(request.fromAirport())
                 .toAirport(request.toAirport())
@@ -82,6 +83,7 @@ public class DeliveryService {
                 .setScale(0, RoundingMode.UP);
     }
 
+    @Transactional(readOnly = true)
     public DeliveryResponse getDelivery(Long deliveryId){
         log.info("Getting delivery with id: {}", deliveryId);
         Delivery delivery = deliveryRepository.findById(deliveryId)
@@ -90,7 +92,7 @@ public class DeliveryService {
     }
 
 
-
+    @Transactional(readOnly = true)
     public List<DeliveryResponse> getUserDeliveries(Long userId){
         log.debug("Getting user's: {} deliveries started", userId);
         try {
@@ -101,6 +103,7 @@ public class DeliveryService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<DeliveryResponse> getAllDeliveries(){
         log.debug("Getting all deliveries");
         try {
@@ -111,6 +114,8 @@ public class DeliveryService {
         }
     }
 
+
+    @Transactional(readOnly = true)
     public List<DeliveryResponse> findAvailableDeliveries(){
         log.debug("Getting all available deliveries");
         try {
@@ -121,13 +126,15 @@ public class DeliveryService {
         }
     }
 
+
+    @Transactional
     public DeliveryResponse assignToDelivery(Long courierId, Long deliveryId){
         log.info("Assign to delivery started");
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() -> new RuntimeException("Delivery not found"));
 
         if (delivery.getStatus() != DeliveryStatus.SEARCHING || delivery.getCourierId() != null) {
-            throw new RuntimeException("Delivery is not available");
+            throw new DeliveryNotAvailableException("Delivery is not available to assign");
         }
 
         delivery.setCourierId(courierId);
@@ -147,12 +154,14 @@ public class DeliveryService {
     }
 
 
+
+    @Transactional
     public void deleteDelivery(Long deliveryId, Long userId) {
         log.debug("SERVICE: Starting removal delivery: {}", deliveryId);
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() -> new DeliveryNotFoundException("Delivery not found"));
         if (delivery.getStatus() != DeliveryStatus.SEARCHING && delivery.getStatus() != DeliveryStatus.CREATED || delivery.getCourierId() != null) {
-            throw new RuntimeException("Delivery is not available to delete");
+            throw new DeliveryNotAvailableException("Delivery is not available to delete");
         }
         if (!delivery.getSenderId().equals(userId)){
             throw new RuntimeException("Not authorized");
@@ -162,6 +171,8 @@ public class DeliveryService {
         deliveryKafkaProducer.sendDeliveryCancelled(delivery);
     }
 
+
+    @Transactional
     public Delivery confirmDeliveryBySender(Long deliveryId, Long senderId) {
         log.debug("SERVICE: confirmDeliveryBySender started");
         Delivery delivery = deliveryRepository.findById(deliveryId)
@@ -176,6 +187,8 @@ public class DeliveryService {
         return deliveryRepository.save(delivery);
     }
 
+
+    @Transactional
     public Delivery confirmDeliveryByCourier(Long deliveryId, Long courierId) {
         log.debug("SERVICE: confirmDeliveryByCourier started");
         Delivery delivery = deliveryRepository.findById(deliveryId)
@@ -188,6 +201,8 @@ public class DeliveryService {
         return deliveryRepository.save(delivery);
     }
 
+
+    @Transactional
     public Delivery confirmDelivery(Long deliveryId, Long courierId) {
         log.debug("SERVICE: confirmDeliveryArrive by courier started");
 
@@ -200,6 +215,7 @@ public class DeliveryService {
         return deliveryRepository.save(delivery);
     };
 
+    @Transactional
     public Delivery confirmArriveDelivery(Long deliveryId, Long senderId) {
         log.debug("SERVICE: confirmDeliveryArrive by sender started");
 

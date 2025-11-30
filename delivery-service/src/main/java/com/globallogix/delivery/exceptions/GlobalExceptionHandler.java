@@ -2,6 +2,7 @@ package com.globallogix.delivery.exceptions;
 
 
 import com.globallogix.delivery.dto.response.ErrorResponseDto;
+import com.globallogix.delivery.exceptions.custom_exceptions.DeliveryNotAvailableException;
 import com.globallogix.delivery.exceptions.custom_exceptions.DeliveryNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -54,6 +55,22 @@ public class GlobalExceptionHandler {
         log.error("Handle bad request", e);
         var errorDto = new ErrorResponseDto(
                 "Bad request",
+                e.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(errorDto);
+    }
+
+
+    @ExceptionHandler({DeliveryNotAvailableException.class})
+    public ResponseEntity<ErrorResponseDto> handleDeliveryNotAvailableException(
+            Exception e
+    ){
+        log.error("Handle delivery not available exception", e);
+        var errorDto = new ErrorResponseDto(
+                "Delivery not available exception",
                 e.getMessage(),
                 LocalDateTime.now()
         );
