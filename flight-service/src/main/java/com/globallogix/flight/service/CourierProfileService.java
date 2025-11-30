@@ -8,6 +8,7 @@ import com.globallogix.flight.repository.CourierProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 public class CourierProfileService {
     private final CourierProfileRepository courierProfileRepository;
 
+    @Transactional
     public CourierProfile createOrUpdateProfile(Long userId, CreateCourierProfileRequest request){
         log.debug("FLIGHT-SERVICE: Creation courier profile started");
         CourierProfile profile = courierProfileRepository.findById(userId)

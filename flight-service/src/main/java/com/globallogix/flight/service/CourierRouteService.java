@@ -8,6 +8,7 @@ import com.globallogix.flight.repository.CourierRouteRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -17,6 +18,8 @@ import java.util.List;
 public class CourierRouteService {
     private final CourierRouteRepository courierRouteRepository;
 
+
+    @Transactional
     public CourierRoute createRoute(Long userId, CourierRouteRequest request) {
         log.debug("FLIGHT-SERVICE: Create route for user {} started", userId);
         CourierRoute route = CourierRoute.builder()
