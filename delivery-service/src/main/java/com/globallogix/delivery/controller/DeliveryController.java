@@ -3,12 +3,15 @@ package com.globallogix.delivery.controller;
 import com.globallogix.delivery.dto.request.DeliveryRequest;
 import com.globallogix.delivery.dto.response.DeliveryResponse;
 import com.globallogix.delivery.entity.Delivery;
-import com.globallogix.delivery.service.DeliveryService;
+import com.globallogix.delivery.service.DeliveryAssignmentService;
+import com.globallogix.delivery.service.DeliveryCreationService;
+import com.globallogix.delivery.service.DeliveryQueryService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +23,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "Delivery Management", description = "APIs for managing deliveries")
 public class DeliveryController {
-    private final DeliveryService deliveryService;
+    private final DeliveryCreationService deliveryCreationService;
+    private final DeliveryQueryService deliveryQueryService;
+    private final DeliveryAssignmentService deliveryAssignmentService;
 
     private Long parseUserId(String userIdStr) {
         try {
@@ -32,85 +37,92 @@ public class DeliveryController {
     }
 
     @PostMapping
-    public DeliveryResponse createDelivery(@RequestBody @Valid DeliveryRequest deliveryRequest,
+    public ResponseEntity<DeliveryResponse> createDelivery(@RequestBody @Valid DeliveryRequest deliveryRequest,
                                            @RequestHeader("X-User-Id") String senderIdStr) {
         Long senderId = parseUserId(senderIdStr); // на самом деле можно не парсить, spring делает сам это
         log.info("Создание доставки пользователем: {}", senderId);
-        return deliveryService.createDelivery(deliveryRequest, senderId);
+        DeliveryResponse response = deliveryCreationService.createDelivery(deliveryRequest, senderId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping
-    public List<DeliveryResponse> findAllDeliveries() {
-        return deliveryService.getAllDeliveries();
+    public ResponseEntity<List<DeliveryResponse>> findAllDeliveries() {
+        List<DeliveryResponse> responses = deliveryQueryService.getAllDeliveries();
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{id}")
-    public DeliveryResponse getDelivery(@PathVariable Long id) {
-        return deliveryService.getDelivery(id);
+    public ResponseEntity<DeliveryResponse> getDelivery(@PathVariable Long id) {
+        DeliveryResponse response = deliveryQueryService.getDelivery(id);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/my")
-    public List<DeliveryResponse> getUserDeliveries(@RequestHeader("X-User-Id") String userIdStr) {
+    public ResponseEntity<List<DeliveryResponse>> getUserDeliveries(@RequestHeader("X-User-Id") String userIdStr) {
         Long userId = parseUserId(userIdStr);
         log.info("Получение доставок пользователя: {}", userId);
-        return deliveryService.getUserDeliveries(userId);
+        List<DeliveryResponse> responses = deliveryQueryService.getUserDeliveries(userId);
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/available")
-    public List<DeliveryResponse> getAvailableDeliveries() {
-        return deliveryService.findAvailableDeliveries();
+    public ResponseEntity<List<DeliveryResponse>> getAvailableDeliveries() {
+        List<DeliveryResponse> responses = deliveryQueryService.findAvailableDeliveries();
+        return ResponseEntity.ok(responses);
     }
 
     @PostMapping("/{id}/take")
-    public DeliveryResponse assignToDelivery(@PathVariable Long id,
+    public ResponseEntity<DeliveryResponse> assignToDelivery(@PathVariable Long id,
                                              @RequestHeader("X-User-Id") String courierIdStr) {
         Long courierId = parseUserId(courierIdStr);
         log.info("Курьер {} берет доставку {}", courierId, id);
-        return deliveryService.assignToDelivery(courierId, id);
+        DeliveryResponse response = deliveryAssignmentService.assignToDelivery(courierId, id);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{deliveryId}/confirm-handover")
-    public ResponseEntity<Delivery> confirmHandOver(@PathVariable Long deliveryId,
+    public ResponseEntity<DeliveryResponse> confirmHandOver(@PathVariable Long deliveryId,
                                                     @RequestHeader("X-User-Id") String senderIdStr) {
         Long senderId = parseUserId(senderIdStr);
         log.info("Подтверждение передачи доставки {} отправителем {}", deliveryId, senderId);
-        Delivery delivery = deliveryService.confirmDeliveryBySender(deliveryId, senderId);
-        return ResponseEntity.ok(delivery);
+        DeliveryResponse response = deliveryAssignmentService.confirmDeliveryBySender(deliveryId, senderId);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{deliveryId}/confirm-pickup")
-    public ResponseEntity<Delivery> confirmPickUp(@PathVariable Long deliveryId,
+    public ResponseEntity<DeliveryResponse> confirmPickUp(@PathVariable Long deliveryId,
                                                   @RequestHeader("X-User-Id") String courierIdStr) {
         Long courierId = parseUserId(courierIdStr);
         log.info("Подтверждение получения доставки {} курьером {}", deliveryId, courierId);
-        Delivery delivery = deliveryService.confirmDeliveryByCourier(deliveryId, courierId);
-        return ResponseEntity.ok(delivery);
+        DeliveryResponse response = deliveryAssignmentService.confirmDeliveryByCourier(deliveryId, courierId);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{deliveryId}/confirm-delivery")
-    public ResponseEntity<Delivery> confirmDelivery(@PathVariable Long deliveryId,
+    public ResponseEntity<DeliveryResponse> confirmDelivery(@PathVariable Long deliveryId,
                                                     @RequestHeader("X-User-Id") String courierIdStr) {
         Long courierId = parseUserId(courierIdStr); // на самом деле можно не парсить, spring делает сам это
         log.info("Подтверждение доставки {} курьером {}", deliveryId, courierId);
-        Delivery delivery = deliveryService.confirmDelivery(deliveryId, courierId);
-        return ResponseEntity.ok(delivery);
+        DeliveryResponse response = deliveryAssignmentService.confirmDelivery(deliveryId, courierId);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{deliveryId}/confirm-delivery-arrive")
-    public ResponseEntity<Delivery> confirmArriveDelivery(@PathVariable Long deliveryId,
+    public ResponseEntity<DeliveryResponse> confirmArriveDelivery(@PathVariable Long deliveryId,
                                                           @RequestHeader("X-User-Id") String senderIdStr) {
         Long senderId = parseUserId(senderIdStr);
         log.info("Подтверждение получения доставки {} отправителем {}", deliveryId, senderId);
-        Delivery delivery = deliveryService.confirmArriveDelivery(deliveryId, senderId);
-        return ResponseEntity.ok(delivery);
+        DeliveryResponse response = deliveryAssignmentService.confirmArriveDelivery(deliveryId, senderId);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/delete/{deliveryId}")
     @CacheEvict(value = "deliveries", key = "#deliveryId")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteDelivery(@PathVariable Long deliveryId,
                                @RequestHeader("X-User-Id") String userIdStr) {
         Long userId = parseUserId(userIdStr);
         log.info("CONTROLLER: Удаление доставки {} пользователем {}", deliveryId, userId);
-        deliveryService.deleteDelivery(deliveryId, userId);
+        deliveryAssignmentService.deleteDelivery(deliveryId, userId);
     }
 }

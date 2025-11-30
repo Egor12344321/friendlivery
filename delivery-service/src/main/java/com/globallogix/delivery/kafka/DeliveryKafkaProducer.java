@@ -3,16 +3,19 @@ package com.globallogix.delivery.kafka;
 
 import com.globallogix.delivery.entity.Delivery;
 import com.globallogix.delivery.kafka.events.DeliveryEventDto;
+import com.globallogix.delivery.service.EventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-
-public class DeliveryKafkaProducer {
+@Primary
+public class DeliveryKafkaProducer implements EventPublisher {
     private final KafkaTemplate<String, DeliveryEventDto> kafkaTemplate;
 
 
