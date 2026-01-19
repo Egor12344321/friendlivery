@@ -38,6 +38,7 @@ public class GeoAspect extends Delivery{
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
         String ip = request.getHeader("X-Forwarded-For");
         String userId = request.getHeader("X-User-Id");
+        log.info("Got client IP {} for user {}", ip, userId);
         CompletableFuture.runAsync(() -> {
             Optional<IpApiResponse> response = client.getUserLocationByIp(ip, userId);
             if (response.isPresent()) {

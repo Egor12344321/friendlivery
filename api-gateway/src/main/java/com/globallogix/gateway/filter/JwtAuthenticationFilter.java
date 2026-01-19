@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono;
 
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Slf4j
@@ -72,7 +73,9 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                 .header("X-User-Roles", rolesHeader)
                 .header("X-Forwarded-For", ipHeader)
                 .build();
-
+        log.info("X-Forwarded-For header: {}", ipHeader);
+        log.info("Host name: {}", Objects.requireNonNull(exchange.getRequest().getRemoteAddress()).getHostName());
+        log.info("");
         log.info("Headers added, forwarding to service");
         return chain.filter(exchange.mutate().request(modRequest).build());
     }
