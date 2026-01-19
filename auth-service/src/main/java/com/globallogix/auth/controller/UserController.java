@@ -2,6 +2,7 @@ package com.globallogix.auth.controller;
 
 
 import com.globallogix.auth.repository.UserRepository;
+import com.globallogix.auth.service.kyc.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,12 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api/users")
 @RequiredArgsConstructor
 public class UserController {
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @GetMapping("/{userId}/email")
     public ResponseEntity<String> getUserEmail(@PathVariable Long userId) {
-        return userRepository.findById(userId)
-                .map(user -> ResponseEntity.ok(user.getEmail()))
-                .orElse(ResponseEntity.notFound().build());
+        return userService.getUserEmail(userId);
     }
 }

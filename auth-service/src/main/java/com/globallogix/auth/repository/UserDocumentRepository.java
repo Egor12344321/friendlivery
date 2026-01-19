@@ -10,5 +10,5 @@ import java.util.List;
 
 @Repository
 public interface UserDocumentRepository extends JpaRepository<UserDocuments, Long> {
-    List<UserDocuments> findByVerificationDocumentsStatus(VerificationDocumentsStatus status);
+    List<UserDocuments> findByDocumentsVerificationStatus(VerificationDocumentsStatus status);
 }

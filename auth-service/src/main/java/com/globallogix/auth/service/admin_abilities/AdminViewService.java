@@ -39,7 +39,7 @@ public class AdminViewService {
 
 
     private List<DocumentVerificationResponse> getDocumentsByStatus(VerificationDocumentsStatus status){
-        return userDocumentRepository.findByVerificationDocumentsStatus(status)
+        return userDocumentRepository.findByDocumentsVerificationStatus(status)
                 .stream().map(DocumentVerificationResponse::mapFromEntityToResponseSuccess).toList();
     }
 

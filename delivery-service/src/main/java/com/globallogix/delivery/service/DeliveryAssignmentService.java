@@ -1,6 +1,7 @@
 package com.globallogix.delivery.service;
 
 
+import com.globallogix.delivery.annotations.GeoAudit;
 import com.globallogix.delivery.dto.response.DeliveryResponse;
 import com.globallogix.delivery.entity.Delivery;
 import com.globallogix.delivery.entity.DeliveryStatus;
@@ -63,6 +64,7 @@ public class DeliveryAssignmentService {
 
 
     @Transactional
+    @GeoAudit
     public DeliveryResponse confirmDeliveryBySender(Long deliveryId, Long senderId) {
         log.debug("SERVICE: confirmDeliveryBySender started");
         Delivery delivery = deliveryRepository.findById(deliveryId)
@@ -80,6 +82,7 @@ public class DeliveryAssignmentService {
 
 
     @Transactional
+    @GeoAudit
     public DeliveryResponse confirmDeliveryByCourier(Long deliveryId, Long courierId) {
         log.debug("SERVICE: confirmDeliveryByCourier started");
         Delivery delivery = deliveryRepository.findById(deliveryId)
@@ -95,6 +98,7 @@ public class DeliveryAssignmentService {
 
 
     @Transactional
+    @GeoAudit
     public DeliveryResponse confirmDelivery(Long deliveryId, Long courierId) {
         log.debug("SERVICE: confirmDeliveryArrive by courier started");
 
@@ -109,6 +113,7 @@ public class DeliveryAssignmentService {
     };
 
     @Transactional
+    @GeoAudit
     public DeliveryResponse confirmArriveDelivery(Long deliveryId, Long senderId) {
         log.debug("SERVICE: confirmDeliveryArrive by sender started");
 

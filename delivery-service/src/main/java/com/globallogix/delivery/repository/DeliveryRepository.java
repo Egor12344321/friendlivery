@@ -12,4 +12,5 @@ import java.util.List;
 public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
     List<Delivery> findBySenderId(Long senderId);
     List<Delivery> findByStatusAndCourierIdIsNull(DeliveryStatus status);
+
 }

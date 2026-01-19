@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -17,10 +18,9 @@ import java.math.BigDecimal;
 @Slf4j
 @RequiredArgsConstructor
 public class EmailService {
-    //private final JavaMailSender javaMailSender;
 
-//    @Value("${spring.mail.password}")
-//    private String from;
+    private final SendMailService sendMailService;
+
 
     public void sendDeliveryOfferEmail(String email, String route, BigDecimal price){
         String subject = "Новая доставка для вас!";
@@ -32,7 +32,7 @@ public class EmailService {
             
             Успейте первым - доставки быстро разбирают!""".formatted(route, price);
         log.info("EMAIL-SERVICE: Sending delivery offer to {}", email);
-//        sendSimpleMail(email, subject, text);
+        sendMailService.sendSimpleMail(email, subject, text);
     }
     public void sendDeliveryCreated(DeliveryEventDto event, String email){
         String subject = "New delivery created successfully";
@@ -40,22 +40,9 @@ public class EmailService {
                 Congratulations! Your delivery: %s created successfully
                 """.formatted(event.getDeliveryId());
         log.info("EMAIL-SERVICE: Sending delivery creation to: {}", email);
-//        sendSimpleMail(email, subject, text);
+        sendMailService.sendSimpleMail(email, subject, text);
     }
-//    private void sendSimpleMail(String email, String subject, String text) {
-//        try{
-//            SimpleMailMessage message = new SimpleMailMessage();
-//            message.setTo(email);
-//            message.setSubject(subject);
-//            message.setText(text);
-//            message.setFrom(from);
-//
-//            javaMailSender.send(message);
-//            log.info("Mail sent successfully");
-//        } catch (Exception e){
-//            log.info("Sending mail failed");
-//        }
-//    }
+
     public void sendMatchedDelivery(DeliveryEventDto event, String courierEmail) {
         String subject = "New matched delivery " + event.getDeliveryId();
         log.info("NOTIFICATION_matched: To: {}, Subject: {}", courierEmail, subject);

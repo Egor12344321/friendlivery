@@ -38,7 +38,8 @@ public class DeliveryController {
 
     @PostMapping
     public ResponseEntity<DeliveryResponse> createDelivery(@RequestBody @Valid DeliveryRequest deliveryRequest,
-                                           @RequestHeader("X-User-Id") String senderIdStr) {
+                                           @RequestHeader("X-User-Id") String senderIdStr, @RequestHeader("X-Forwarded-For") String ip) {
+        log.info("Получен IP-адрес: {}", ip);
         Long senderId = parseUserId(senderIdStr); // на самом деле можно не парсить, spring делает сам это
         log.info("Создание доставки пользователем: {}", senderId);
         DeliveryResponse response = deliveryCreationService.createDelivery(deliveryRequest, senderId);
@@ -82,7 +83,8 @@ public class DeliveryController {
 
     @PostMapping("/{deliveryId}/confirm-handover")
     public ResponseEntity<DeliveryResponse> confirmHandOver(@PathVariable Long deliveryId,
-                                                    @RequestHeader("X-User-Id") String senderIdStr) {
+                                                    @RequestHeader("X-User-Id") String senderIdStr,
+                                                            @RequestHeader("X-Forwarded-For") String ip) {
         Long senderId = parseUserId(senderIdStr);
         log.info("Подтверждение передачи доставки {} отправителем {}", deliveryId, senderId);
         DeliveryResponse response = deliveryAssignmentService.confirmDeliveryBySender(deliveryId, senderId);

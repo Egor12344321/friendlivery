@@ -8,10 +8,12 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Set;
 
@@ -40,6 +42,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         }
 
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        String ipHeader = extractClintIp(exchange.getRequest());
         log.info("Auth header present: {}", authHeader != null);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -67,11 +70,33 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                 .header("X-User-Id", userId)
                 .header("X-User-Verification-Status", verificationStatus)
                 .header("X-User-Roles", rolesHeader)
+                .header("X-Forwarded-For", ipHeader)
                 .build();
 
         log.info("Headers added, forwarding to service");
         return chain.filter(exchange.mutate().request(modRequest).build());
     }
+
+    private String extractClintIp(ServerHttpRequest request) {
+        InetSocketAddress remoteAddress = request.getRemoteAddress();
+
+        if (remoteAddress != null){
+            String ip = remoteAddress.getAddress().getHostAddress();
+            if (ip.startsWith("/")) {
+                ip = ip.substring(1);
+            }
+
+            if (isValidIp(ip)) {
+                return ip;
+            }
+        }
+        return "UNKNOWN";
+    }
+
+    private boolean isValidIp(String ip) {
+        return ip != null && ip.matches("^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$");
+    }
+
 
     private Mono<Void> unauthorized(ServerWebExchange exchange, String message) {
         log.error("Unauthorized: {}", message);
