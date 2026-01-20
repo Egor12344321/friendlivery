@@ -66,16 +66,15 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         List<String> roles  = jwtUtil.extractUserRoles(token);
         String rolesHeader = roles != null ? String.join(",", roles) : "";
         log.info("Valid token ID: {}", userId);
-
+        log.info("X-Forwarded-For: {}", exchange.getRequest().getHeaders().getFirst("X-Forwarded-For"));
         var modRequest = exchange.getRequest().mutate()
                 .header("X-User-Id", userId)
                 .header("X-User-Verification-Status", verificationStatus)
                 .header("X-User-Roles", rolesHeader)
-                .header("X-Forwarded-For", ipHeader)
+                .header("X-Client-IP", ipHeader)
                 .build();
-        log.info("X-Forwarded-For header: {}", ipHeader);
+        log.info("X-Client-IP header: {}", ipHeader);
         log.info("Host name: {}", Objects.requireNonNull(exchange.getRequest().getRemoteAddress()).getHostName());
-        log.info("");
         log.info("Headers added, forwarding to service");
         return chain.filter(exchange.mutate().request(modRequest).build());
     }

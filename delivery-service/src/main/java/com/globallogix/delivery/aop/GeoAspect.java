@@ -36,12 +36,14 @@ public class GeoAspect extends Delivery{
     @Around("@annotation(com.globallogix.delivery.annotations.GeoAudit)")
     public void getUserLocationById(){
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
-        String ip = request.getHeader("X-Forwarded-For");
+        String ip = request.getHeader("X-Client-IP");
         String userId = request.getHeader("X-User-Id");
         log.info("Got client IP {} for user {}", ip, userId);
         CompletableFuture.runAsync(() -> {
             Optional<IpApiResponse> response = client.getUserLocationByIp(ip, userId);
+            log.info("Request to ip-api ended with response: {}", response);
             if (response.isPresent()) {
+                log.info("Response NOT NULL from Ip-Api");
                 UserLocations userLocations = IpApiResponse.mapFromResponseToEntity(response.get());
                 userLocationsRepository.save(userLocations);
                 log.info("UserLocations saved to db for user with id: {}", userId);

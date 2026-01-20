@@ -21,17 +21,22 @@ public class IpApiClient {
 
     public Optional<IpApiResponse> getUserLocationByIp(String ip, String userId){
         String url = "http://ip-api.com/json/" + ip + "?fields=17035263";
-        log.info("Trying to get location by ip");
+        log.info("Trying to get location by ip with url: {}", url);
         try {
+            log.info("Starting request to ip-api");
             IpApiResponse response = restTemplate.getForObject(url, IpApiResponse.class);
+            log.info("Got response from ip-api");
             if (response != null && "success".equals(response.getStatus())) {
+                log.info("Got success response from ip-api for user: {}", userId);
+                return Optional.of(response);
+            } else if (response != null && "fail".equals(response.getStatus())){
+                log.info("Got fail response from ip-api for user: {}", userId);
                 return Optional.of(response);
             }
         } catch (Exception e){
             log.error("Failed to load geodata for the user with id: {}", userId);
         }
-
+        log.info("Response from ip-api is empty");
         return Optional.empty();
-
     }
 }

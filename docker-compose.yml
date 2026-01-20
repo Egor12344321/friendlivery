@@ -159,10 +159,10 @@ services:
 
     ports:
       - "8080:8080"
-    depends_on:
-      - auth-service
-      - delivery-service
-      - flight-service
+#    depends_on:
+#      - auth-service
+#      - delivery-service
+#      - flight-service
     networks:
       - global-logix-network
 
