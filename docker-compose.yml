@@ -186,16 +186,13 @@ services:
     networks:
       - global-logix-network
   prometheus:
-    image: bitnami/prometheus:latest
+    image: prom/prometheus
     container_name: prometheus
     ports:
       - "9090:9090"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
+      - ./prometheus/data:/prometheus
     networks:
       - global-logix-network
 
@@ -207,12 +204,13 @@ services:
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
-      - grafana_data:/var/lib/grafana
+      - ./grafana/data:/var/lib/grafana
     networks:
       - global-logix-network
 
 volumes:
   postgres_data:
+
 
 networks:
   global-logix-network:

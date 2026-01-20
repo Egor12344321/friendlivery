@@ -23,30 +23,30 @@ scrape_configs:
         labels:
           application: 'delivery-service'
 
-  - job_name: 'chat-service'
-    metrics_path: '/actuator/prometheus'
-    static_configs:
-      - targets: [ 'chat-service:8080' ]
-        labels:
-          application: 'chat-service'
-
-  - job_name: 'flight-service'
-    metrics_path: '/actuator/prometheus'
-    static_configs:
-      - targets: [ 'flight-service:8080' ]
-        labels:
-          application: 'flight-service'
-
-  - job_name: 'notifications-service'
-    metrics_path: '/actuator/prometheus'
-    static_configs:
-      - targets: [ 'notifications-service:8080' ]
-        labels:
-          application: 'notifications-service'
-
-  - job_name: 'payment-service'
-    metrics_path: '/actuator/prometheus'
-    static_configs:
-      - targets: [ 'payment-service:8080' ]
-        labels:
-          application: 'payment-service'
+#  - job_name: 'chat-service'
+#    metrics_path: '/actuator/prometheus'
+#    static_configs:
+#      - targets: [ 'chat-service:8080' ]
+#        labels:
+#          application: 'chat-service'
+#
+#  - job_name: 'flight-service'
+#    metrics_path: '/actuator/prometheus'
+#    static_configs:
+#      - targets: [ 'flight-service:8080' ]
+#        labels:
+#          application: 'flight-service'
+#
+#  - job_name: 'notifications-service'
+#    metrics_path: '/actuator/prometheus'
+#    static_configs:
+#      - targets: [ 'notifications-service:8080' ]
+#        labels:
+#          application: 'notifications-service'
+#
+#  - job_name: 'payment-service'
+#    metrics_path: '/actuator/prometheus'
+#    static_configs:
+#      - targets: [ 'payment-service:8080' ]
+#        labels:
+#          application: 'payment-service'

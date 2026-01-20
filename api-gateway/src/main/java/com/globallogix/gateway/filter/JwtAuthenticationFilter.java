@@ -28,7 +28,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     private final Set<String> publicPaths = Set.of(
             "/api/auth/login", "/api/auth/register",
             "/api/auth/refresh", "/auth/refresh",
-            "/auth/login", "/auth/register"
+            "/auth/login", "/auth/register", "/actuator/prometheus"
     );
 
     @Override

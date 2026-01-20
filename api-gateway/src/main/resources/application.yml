@@ -47,6 +47,13 @@ management:
     export:
       prometheus:
         enabled: true
+    enable:
+      gateway: false
+      jvm: true
+      http: true
+    tags:
+      application:
+        api-gateway
   endpoint:
     prometheus:
       enabled: true

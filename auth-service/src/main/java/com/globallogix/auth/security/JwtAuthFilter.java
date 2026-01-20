@@ -34,7 +34,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String method = request.getMethod();
 
         log.debug("Filtering request: {} {}", method, path);
-        if (requestPath.startsWith("/api/auth/") &&
+        if (requestPath.startsWith("/api/auth/") && requestPath.startsWith("/actuator/") && requestPath.startsWith("/api/actuator/") && requestPath.startsWith("/api/auth/actuator/") && requestPath.startsWith("/actuator/prometheus") &&
                 !requestPath.equals("/api/auth/validate")) {
             filterChain.doFilter(request, response);
             return;
