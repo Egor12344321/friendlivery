@@ -1,0 +1,28 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+option java_multiple_files = true;
+option java_package = "com.globallogix.delivery.grpc";
+option java_outer_classname = "DeliveryProto";
+option java_generic_services = false;
+option java_generate_equals_and_hash = true;
+
+
+message DeliveryResponse{
+  string id = 1;
+  string sender_id = 2;
+  string courier_id = 3;
+  string from_airport = 4;
+  string to_airport = 5;
+  string description = 6;
+  string weight = 7;
+  string dimensions = 8;
+  string price = 9;
+  string status = 10;
+}
+
+message DeliveryListResponse{
+  repeated DeliveryResponse responses = 1;
+}
+service DeliveryService{
+    rpc FindAvailableDeliveries(google.protobuf.Empty) returns (DeliveryListResponse);
+}

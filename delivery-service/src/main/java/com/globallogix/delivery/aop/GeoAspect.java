@@ -28,7 +28,7 @@ import java.util.function.Consumer;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class GeoAspect extends Delivery{
+public class GeoAspect {
 
     private final IpApiClient client;
     private final UserLocationsRepository userLocationsRepository;

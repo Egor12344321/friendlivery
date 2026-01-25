@@ -69,6 +69,7 @@ services:
     container_name: delivery-service
     ports:
       - "8082:8080"
+      - "9090:9090"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/globallogix
       SPRING_DATASOURCE_USERNAME: postgres
