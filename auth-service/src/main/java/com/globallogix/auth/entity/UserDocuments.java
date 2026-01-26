@@ -29,6 +29,12 @@ public class UserDocuments {
     @Column(name = "link_to_selfie")
     private String linkToSelfie;
 
+    @Column(name = "passport_series")
+    private String passportSeries;
+
+    @Column(name = "passport_number")
+    private String passportNumber;
+
     @Column(name = "documents_verification_status")
     @Enumerated(EnumType.STRING)
     private VerificationDocumentsStatus documentsVerificationStatus;

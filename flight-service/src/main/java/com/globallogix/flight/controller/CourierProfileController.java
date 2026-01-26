@@ -9,6 +9,8 @@ import com.globallogix.flight.service.CourierProfileService;
 import com.globallogix.flight.service.CourierRouteService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,9 +24,13 @@ public class CourierProfileController {
     private final CourierRouteService courierRouteService;
 
     @PostMapping("/profile")
-    public CourierProfile createProfile(@RequestHeader("X-User-Id") Long userId, @RequestBody CreateCourierProfileRequest request){
+    public ResponseEntity<?> createProfile(@RequestHeader("X-User-Id") Long userId, @RequestHeader("X-User-Verification-Status") String verificationStatus, @RequestBody CreateCourierProfileRequest request){
         log.debug("FLIGHT-CONTROLLER: Controller get request to creation courier-profile for user: {}", userId);
-        return courierProfileService.createOrUpdateProfile(userId, request);
+        if (verificationStatus.equals("VERIFIED")) {
+            return ResponseEntity.ok(courierProfileService.createOrUpdateProfile(userId, request));
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("/api/kyc/passport/verification");
+        }
     }
     @GetMapping("/profile")
     public CourierProfile getProfile(@RequestHeader("X-User-Id") Long userId) {

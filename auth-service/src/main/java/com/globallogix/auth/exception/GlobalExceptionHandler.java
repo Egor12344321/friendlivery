@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
                 .body(e.getMessage());
     }
 
-    @ExceptionHandler({UsernameNotUniqueException.class})
+    @ExceptionHandler({InternalClientException.class})
     public ResponseEntity<?> handleInternalClientException(InternalClientException e){
         log.error("Handle internalClientException");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
