@@ -2,6 +2,7 @@ package com.globallogix.delivery.client;
 
 
 import com.globallogix.delivery.exceptions.custom_exceptions.IpApiException;
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

@@ -2,7 +2,10 @@ package com.globallogix.auth.controller;
 
 
 import com.globallogix.auth.dto.request.DocumentVerificationRequest;
+import com.globallogix.auth.dto.request.UploadPassportRequest;
+import com.globallogix.auth.dto.response.PassportVerificationResponse;
 import com.globallogix.auth.dto.response.documents.DocumentVerificationResponse;
+import com.globallogix.auth.service.client.UploadPassportService;
 import com.globallogix.auth.service.kyc.DocumentsService;
 import com.globallogix.auth.service.kyc.UserService;
 import jakarta.validation.Valid;
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class KycController {
     private final UserService userService;
     private final DocumentsService documentsService;
+    private final UploadPassportService uploadPassportService;
 
     @PostMapping("/documents/upload")
     public ResponseEntity<DocumentVerificationResponse> uploadPassport(
@@ -31,6 +35,13 @@ public class KycController {
         String username = auth.getName();
         log.info("KYC-CONTROLLER: Got username from context: {}; starting uploading to db", username);
         DocumentVerificationResponse response = documentsService.uploadDocuments(request, username);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/passport/verification")
+    public ResponseEntity<PassportVerificationResponse> uploadPassportData(@Valid @RequestBody UploadPassportRequest request){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        PassportVerificationResponse response = uploadPassportService.uploadPassportData(request, auth.getName());
         return ResponseEntity.ok(response);
     }
 
