@@ -1,0 +1,398 @@
+openapi: 3.1.0
+info:
+  title: Friendlivery Delivery Service API
+  description: "Microservice for delivery management, matching, and tracking"
+  version: "1.0"
+servers:
+- url: http://localhost:8082
+  description: Generated server url
+tags:
+- name: Delivery Management
+  description: APIs for managing deliveries
+paths:
+  /api/deliveries:
+    get:
+      tags:
+      - Получить все доставки
+      - Delivery Management
+      operationId: findAllDeliveries
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DeliveryResponse"
+    post:
+      tags:
+      - Создать заказ
+      - Delivery Management
+      operationId: createDelivery
+      parameters:
+      - name: X-User-Id
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: X-Forwarded-For
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeliveryRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/DeliveryResponse"
+  /api/deliveries/{id}/take:
+    post:
+      tags:
+      - Взятие заказа курьером
+      - Delivery Management
+      description: Взятие заказа курьером
+      operationId: assignToDelivery
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: X-User-Id
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/DeliveryResponse"
+  /api/deliveries/{deliveryId}/confirm-pickup:
+    post:
+      tags:
+      - Подтверждение передачи доставки курьером
+      - Delivery Management
+      operationId: confirmPickUp
+      parameters:
+      - name: deliveryId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: X-User-Id
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/DeliveryResponse"
+  /api/deliveries/{deliveryId}/confirm-handover:
+    post:
+      tags:
+      - Подтверждение передачи доставки отправителем
+      - Delivery Management
+      operationId: confirmHandOver
+      parameters:
+      - name: deliveryId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: X-User-Id
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: X-Forwarded-For
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/DeliveryResponse"
+  /api/deliveries/{deliveryId}/confirm-delivery:
+    post:
+      tags:
+      - Подтверждение завершения доставки курьером
+      - Delivery Management
+      operationId: confirmDelivery
+      parameters:
+      - name: deliveryId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: X-User-Id
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/DeliveryResponse"
+  /api/deliveries/{deliveryId}/confirm-delivery-arrive:
+    post:
+      tags:
+      - Подтверждение завершения доставки отправителем
+      - Delivery Management
+      operationId: confirmArriveDelivery
+      parameters:
+      - name: deliveryId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: X-User-Id
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/DeliveryResponse"
+  /test/geo:
+    get:
+      tags:
+      - test-ip-api-client-controller
+      operationId: getUserLocation
+      parameters:
+      - name: X-Client-IP
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /api/deliveries/{id}:
+    get:
+      tags:
+      - Получить доставки по id
+      - Delivery Management
+      operationId: getDelivery
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/DeliveryResponse"
+  /api/deliveries/my:
+    get:
+      tags:
+      - Все заказы пользователя
+      - Delivery Management
+      operationId: getUserDeliveries
+      parameters:
+      - name: X-User-Id
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DeliveryResponse"
+  /api/deliveries/available:
+    get:
+      tags:
+      - Найти доступные для доставки заказы
+      - Delivery Management
+      operationId: getAvailableDeliveries
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DeliveryResponse"
+  /api/deliveries/delete/{deliveryId}:
+    delete:
+      tags:
+      - Удаление доставки
+      - Delivery Management
+      operationId: deleteDelivery
+      parameters:
+      - name: deliveryId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: X-User-Id
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+components:
+  schemas:
+    DeliveryRequest:
+      type: object
+      properties:
+        fromAirport:
+          type: string
+          description: Departure airport code
+          example: SVO
+        toAirport:
+          type: string
+          description: Destination airport code
+          example: JFK
+        desiredDate:
+          type: string
+          format: date
+          description: Desired delivery date
+          example: 2024-12-25
+        description:
+          type: string
+          description: Package description
+          example: Important documents
+        weight:
+          type: number
+          format: double
+          description: Package weight in kg
+          example: 2.5
+        dimensions:
+          type: string
+          description: Package dimensions
+          example: 30x20x10 cm
+        notes:
+          type: string
+          description: Additional notes
+          example: Fragile content
+        deliveryDeadline:
+          type: string
+          format: date
+          description: Delivery deadline
+          example: 2025-12-30
+      required:
+      - deliveryDeadline
+      - fromAirport
+      - toAirport
+      - weight
+    DeliveryResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Delivery ID
+          example: 1
+        senderId:
+          type: integer
+          format: int64
+          description: Sender ID
+          example: 12345
+        courierId:
+          type: integer
+          format: int64
+          description: Courier ID
+          example: 67890
+        fromAirport:
+          type: string
+          description: Departure airport
+          example: SVO
+        toAirport:
+          type: string
+          description: Destination airport
+          example: JFK
+        desiredDate:
+          type: string
+          format: date
+          description: Desired date
+          example: 2024-12-25
+        description:
+          type: string
+          description: Package description
+          example: Important documents
+        weight:
+          type: number
+          format: double
+          description: Package weight
+          example: 2.5
+        dimensions:
+          type: string
+          description: Package dimensions
+          example: 30x20x10 cm
+        status:
+          type: string
+          description: Delivery status
+          enum:
+          - CREATED
+          - SEARCHING
+          - COURIER_FOUND
+          - PICKUP_PENDING
+          - IN_PROGRESS
+          - ARRIVED
+          - DELIVERED
+          - CANCELLED
+          example: CREATED
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+          example: 2024-01-15T10:30:00
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          example: 2024-01-15T10:30:00
+        price:
+          type: number
+          description: Delivery price
+          example: 150.0

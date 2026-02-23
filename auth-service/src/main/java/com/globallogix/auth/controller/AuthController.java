@@ -9,6 +9,8 @@ import com.globallogix.auth.exception.InvalidTokenRefreshException;
 import com.globallogix.auth.security.JwtUtil;
 import com.globallogix.auth.service.authorization.AuthService;
 import com.globallogix.auth.service.refresh.RefreshTokenService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,11 +30,14 @@ import java.util.Map;
 @RequiredArgsConstructor
 @EnableMethodSecurity
 @Slf4j
+@Tag(name = "Authorization and authentication")
 public class AuthController {
     private final AuthService authService;
     private final JwtUtil jwtUtil;
     private final RefreshTokenService refreshTokenService;
 
+
+    @Operation(description = "Регистрация пользователя")
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request){
         AuthResponse response = authService.register(request);
@@ -43,6 +48,8 @@ public class AuthController {
 
     }
 
+
+    @Operation(description = "Вход в систему (логин)")
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request){
         log.debug("CONTROLLER: Login started");
@@ -54,6 +61,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
+    @Operation(description = "Обновить токены")
     public ResponseEntity<?> refreshTokens(
             @CookieValue(value = "refresh", required = false) String refreshToken) {
         log.debug("CONTROLLER: Updating tokens started");
@@ -100,6 +108,7 @@ public class AuthController {
                 .body(Map.of("error", message));
     }
     @PostMapping("/logout")
+    @Operation(description = "Выход из системы (логаут)")
     public ResponseEntity<Void> logout(
             @CookieValue(value = "refresh", required = false) String refreshToken,
             HttpServletRequest request) {
