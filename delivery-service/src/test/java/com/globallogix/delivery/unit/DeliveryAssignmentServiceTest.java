@@ -1,10 +1,9 @@
-package com.globallogix.delivery;
+package com.globallogix.delivery.unit;
 
 import com.globallogix.delivery.dto.response.DeliveryResponse;
 import com.globallogix.delivery.entity.Delivery;
 import com.globallogix.delivery.entity.DeliveryStatus;
 import com.globallogix.delivery.exceptions.custom_exceptions.DeliveryNotAvailableException;
-import com.globallogix.delivery.exceptions.custom_exceptions.DeliveryNotFoundException;
 import com.globallogix.delivery.repository.DeliveryRepository;
 import com.globallogix.delivery.service.DeliveryAssignmentService;
 import com.globallogix.delivery.service.EventPublisher;
@@ -14,7 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;

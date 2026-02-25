@@ -1,4 +1,4 @@
-package com.globallogix.delivery;
+package com.globallogix.delivery.unit;
 
 import com.globallogix.delivery.dto.request.DeliveryRequest;
 import com.globallogix.delivery.dto.response.DeliveryResponse;
